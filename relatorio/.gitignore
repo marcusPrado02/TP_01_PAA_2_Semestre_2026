@@ -1,0 +1,13 @@
+# Arquivos intermediarios do LaTeX
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.loq
+*.synctex.gz
+*.fls
+*.fdb_latexmk

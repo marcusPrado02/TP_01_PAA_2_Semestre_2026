@@ -1,0 +1,179 @@
+\chapter{Metodologia}
+\label{cap:metodologia}
+
+\section{Ambiente experimental}
+
+Os experimentos foram executados em máquina com sistema operacional Linux
+(\textit{kernel} 6.17), arquitetura x86-64. O código foi escrito em C++17 e
+compilado com \texttt{g++} 13.3 e otimização \texttt{-O2}, sem qualquer diretiva
+específica de arquitetura, de modo a manter a reprodutibilidade em outras máquinas.
+A medição de tempo utiliza o relógio monotônico da máquina
+(\texttt{std::chrono::steady\-\_clock}), imune a ajustes do relógio de parede
+durante a execução.
+
+\section{Organização da implementação}
+
+As três versões exigidas pelo enunciado diferem entre si em apenas dois aspectos:
+\textbf{onde a recursão é interrompida} (parâmetro $M$) e \textbf{como o pivô é
+escolhido} (estratégia \texttt{PRIMEIRO}, \texttt{MEIO} ou \texttt{MEDIANA3}). Por
+esse motivo, optou-se por implementar um \textbf{único motor} de ordenação,
+parametrizado por esses dois valores; as três versões do enunciado são atalhos com
+parâmetros fixos, conforme o Quadro \ref{tab:versoes}.
+
+\begin{table}[H]
+\centering
+\caption{Parametrização das três versões a partir do motor único.}
+\label{tab:versoes}
+\begin{tabular}{lcc}
+\hline
+\textbf{Versão} & \textbf{$M$} & \textbf{Estratégia de pivô} \\
+\hline
+(a) Quicksort recursivo & 1 & Elemento central \\
+(b) Quicksort híbrido & 40 & Elemento central \\
+(c) Híbrido com mediana-de-três & 40 & Mediana de três \\
+\hline
+(d) Pivô inadequado (pior caso) & 1 & Primeiro elemento \\
+\hline
+\end{tabular}
+\end{table}
+
+Essa decisão de projeto não visa apenas à economia de código. Ela garante que as três
+variantes contabilizem comparações e trocas \textbf{exatamente da mesma forma}, o que
+é condição necessária para a validade da comparação experimental: se cada versão
+possuísse seu próprio laço de partição, qualquer divergência na contagem seria
+indistinguível de uma diferença real de desempenho. Pelo mesmo motivo, a versão (d),
+usada para forçar o pior caso, é obtida apenas trocando a estratégia de pivô, sem
+qualquer outra alteração no algoritmo.
+
+\section{Convenções de contagem}
+
+Conforme exigido pelo enunciado, os algoritmos mantêm contadores de comparações e
+trocas. As convenções adotadas são as seguintes:
+
+\begin{itemize}
+  \item \textbf{Comparações}: contabiliza-se toda comparação entre \textit{chaves} do
+        vetor (elemento contra pivô ou elemento contra elemento). Comparações entre
+        índices, como $i \leq j$, não são contabilizadas, por constituírem controle de
+        laço e não dependerem dos dados;
+  \item \textbf{Trocas}: contabiliza-se toda \textit{movimentação} de chave dentro do
+        vetor. No Quicksort, cada troca da partição conta como uma unidade; no
+        Insertion Sort, cada deslocamento $v[j+1] \leftarrow v[j]$ também conta como
+        uma unidade.
+\end{itemize}
+
+A segunda convenção merece justificativa. Contabilizar o deslocamento do Insertion
+Sort como troca mantém as duas grandezas na mesma unidade semântica --- ``quantas
+vezes um elemento mudou de posição'' --- permitindo que os dois algoritmos sejam
+somados nas versões híbridas sem distorção. A alternativa, contar apenas permutações
+de pares, subestimaria sistematicamente o trabalho realizado pelo Insertion Sort.
+
+\section{Massas de teste}
+\label{sec:massas}
+
+Foram utilizadas cinco massas de teste, descritas na Tabela \ref{tab:massas}, com
+$n$ igual a 1.000, 10.000, 100.000 e 500.000 elementos.
+
+\begin{table}[H]
+\centering
+\caption{Massas de teste utilizadas.}
+\label{tab:massas}
+\begin{tabular}{lp{9.5cm}}
+\hline
+\textbf{Massa} & \textbf{Descrição} \\
+\hline
+Aleatório & Chaves uniformemente distribuídas em $[0, 10n)$. Representa o caso médio. \\
+Ordenado & $0, 1, \ldots, n-1$. Melhor caso para pivô central; pior caso para pivô igual ao primeiro elemento. \\
+Inverso & $n-1, \ldots, 1, 0$. Pior caso do Insertion Sort. \\
+Repetidos & Apenas 10 chaves distintas, sorteadas uniformemente. Avalia o tratamento de chaves iguais. \\
+Quase ordenado & Vetor ordenado com aproximadamente 1\% dos elementos trocados de posição. Representa a situação comum na prática. \\
+\hline
+\end{tabular}
+\end{table}
+
+Todas as massas são geradas de forma \textbf{determinística} a partir da tripla
+(tipo, $n$, semente), utilizando o gerador Mersenne Twister com semente explícita.
+Isso assegura duas propriedades: todas as versões do algoritmo são medidas sobre
+exatamente os mesmos dados, e qualquer execução pode ser reproduzida integralmente.
+
+A massa \textbf{Repetidos} merece observação. Com apenas 10 chaves distintas em até
+500.000 posições, ela estressa o comportamento do algoritmo diante de chaves iguais.
+O esquema de partição de Hoare adotado neste trabalho comporta-se bem nesse cenário:
+quando todos os elementos de um subvetor são iguais ao pivô, os dois índices avançam
+simetricamente e a partição resulta balanceada. Cabe registrar que o esquema
+alternativo de Lomuto degeneraria para $\Theta(n^2)$ nessa mesma entrada --- o que
+ilustra como a escolha do esquema de partição, detalhe frequentemente omitido, tem
+consequências assintóticas.
+
+\section{Procedimento de medição}
+\label{sec:medicao}
+
+O enunciado exige que cada versão seja executada várias vezes sobre as mesmas massas
+de dados, a fim de obter médias confiáveis. Durante os testes preliminares,
+verificou-se que essa exigência, isoladamente, é insuficiente. Duas decisões
+adicionais foram necessárias e são documentadas aqui por afetarem diretamente as
+conclusões.
+
+\subsection{Descarte da fase de aquecimento}
+
+Em medições preliminares, uma \textbf{mesma carga de trabalho} registrou
+\textbf{16,2 ms} na primeira execução do processo e \textbf{5,3 ms} poucos segundos
+depois --- variação de aproximadamente três vezes, causada pelo governador de
+frequência do processador, e não pelo algoritmo.
+
+O efeito não é inócuo. Como a varredura de $M$ é percorrida em ordem crescente, os
+menores valores de $M$ eram medidos enquanto o processador ainda operava em
+frequência reduzida. A calibração indicava, assim, $M = 100$ como valor ótimo,
+enquanto o número de comparações --- métrica determinística e imune a esse efeito ---
+apontava $M \approx 20$. O ``ótimo'' era artefato de aquecimento.
+
+Cabe destacar que \textbf{repetir as execuções e tirar a média não corrige esse
+viés}, por ser ele sistemático, e não aleatório: todas as repetições de uma
+configuração medida cedo são igualmente penalizadas. A correção exige descartar a
+fase transitória. O programa, portanto, executa uma rotina de aquecimento de dois
+segundos antes de qualquer medição e descarta uma execução adicional por
+configuração.
+
+\subsection{Uso da mediana}
+
+O ruído residual de medição --- preempção pelo escalonador do sistema operacional,
+migração entre núcleos, interferência de outros processos --- só pode
+\textit{acrescentar} tempo, nunca subtraí-lo. A distribuição das medidas é, portanto,
+assimétrica à direita, e a média é sistematicamente puxada pelos valores atípicos.
+
+Por essa razão, a análise apresentada no Capítulo \ref{cap:resultados} utiliza a
+\textbf{mediana} dos tempos. Os arquivos de resultado registram mediana, média,
+mínimo e desvio-padrão, de modo que a dispersão das medidas permanece documentada e
+verificável.
+
+\subsection{Número de repetições}
+
+O número de repetições é adaptativo, pois entradas pequenas são ordenadas em dezenas
+de microssegundos e sofrem proporcionalmente muito mais com transientes do sistema.
+Nos experimentos principais utilizaram-se 10 repetições para $n \leq 10.000$, 5 para
+$n = 100.000$ e 3 para $n = 500.000$. Na calibração de $M$, onde as diferenças são
+mais sutis, utilizaram-se até 200 repetições para $n = 1.000$.
+
+\subsection{Verificação de corretude}
+
+Antes de qualquer medição, uma bateria de validação compara a saída das três versões
+com a de \texttt{std::sort} em 509 casos, incluindo vetores vazios, unitários, com
+todos os elementos iguais e as cinco massas em oito tamanhos distintos.
+Adicionalmente, \textbf{toda} execução medida tem seu resultado verificado com
+\texttt{std::is\_sorted}: uma implementação que não ordenasse corretamente
+interromperia o programa, em vez de reportar um tempo de execução artificialmente
+baixo.
+
+\section{Calibração empírica de \textit{M}}
+\label{sec:calibracao}
+
+Para determinar $M$, varreu-se $M \in \{1, 2, \ldots, 200\}$ sobre as massas
+Aleatório, Ordenado e Repetidos, para $n \in \{1.000;\ 10.000;\ 100.000\}$ e para as
+duas estratégias de pivô.
+
+O critério de escolha adotado \textbf{não} é o mínimo absoluto do tempo. Nas
+proximidades do ótimo, a curva é praticamente plana, e o mínimo absoluto passa a ser
+determinado por ruído: em execuções preliminares ele oscilou entre 12 e 100, sem
+diferença real de desempenho. Adotou-se, portanto, o critério do \textbf{menor $M$
+cujo tempo permanece dentro de 2\% do melhor tempo observado}, que é reprodutível
+entre execuções e mantém o Insertion Sort restrito a subvetores efetivamente
+pequenos.

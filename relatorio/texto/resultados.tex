@@ -1,0 +1,430 @@
+\chapter{Resultados e Análise}
+\label{cap:resultados}
+
+\section{Calibração de \textit{M}}
+\label{sec:res-calibracao}
+
+A Figura \ref{fig:calib-tempo} apresenta o tempo mediano de execução em função de
+$M$, e a Figura \ref{fig:calib-comp}, o número de comparações. A Tabela
+\ref{tab:calibracao} resume os valores obtidos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/calibracao_m_tempo.png}
+\caption{Tempo mediano de execução em função de $M$, para três tamanhos de entrada.}
+\label{fig:calib-tempo}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/calibracao_m_comparacoes.png}
+\caption{Número médio de comparações em função de $M$.}
+\label{fig:calib-comp}
+\end{figure}
+\FloatBarrier
+
+\begin{table}[H]
+\centering
+\caption{Valores de $M$ obtidos pela calibração empírica.}
+\label{tab:calibracao}
+\begin{tabular}{lccc}
+\hline
+\textbf{Estratégia de pivô} & \textbf{$n$} & \textbf{$M$ recomendado} & \textbf{$M$ por comparações} \\
+\hline
+Elemento central & 1.000 & 40 & 20 \\
+Elemento central & 10.000 & 40 & 20 \\
+Elemento central & 100.000 & 40 & 25 \\
+Mediana de três & 1.000 & 40 & 20 \\
+Mediana de três & 10.000 & 40 & 20 \\
+Mediana de três & 100.000 & 40 & 25 \\
+\hline
+\end{tabular}
+\end{table}
+
+Três observações merecem destaque.
+
+\paragraph{Estabilidade.} O valor recomendado, $M \approx 30$--$40$, manteve-se
+estável entre execuções independentes, entre os três tamanhos de entrada e entre as
+duas estratégias de pivô. O platô de bom desempenho estende-se aproximadamente de
+$M = 20$ a $M = 70$, o que indica que a escolha exata dentro dessa faixa é pouco
+relevante na prática. Adotou-se $M = 40$ nos experimentos subsequentes.
+
+\paragraph{Divergência entre os critérios.} O mínimo do número de comparações ocorre
+em $M \approx 20$--$25$, enquanto o mínimo do tempo ocorre em valores mais altos.
+A divergência é informativa: acima de $M = 25$, o algoritmo passa a executar
+\textit{mais} comparações e ainda assim torna-se \textit{mais rápido}. Esse fenômeno
+é analisado na Seção \ref{sec:analise-critica}.
+
+\paragraph{Comparação com a literatura.} O valor obtido é superior à faixa de 5 a 25
+sugerida por \citeonline{sedgewick1978}. A diferença é coerente com a evolução do
+hardware: as recomendações clássicas foram estabelecidas em máquinas nas quais o
+custo relativo de uma comparação era muito maior que o de um acesso à memória. Em
+processadores atuais, o Insertion Sort sobre blocos pequenos apresenta localidade de
+cache e previsibilidade de desvios excelentes, além de ser passível de vetorização
+pelo compilador, o que desloca o ponto de equilíbrio para valores maiores de $M$.
+Soma-se a isso o fato de as chaves utilizadas serem do tipo \texttt{int}, cuja
+movimentação é barata, favorecendo ainda mais o Insertion Sort.
+
+\section{Comparação entre as três versões}
+
+As Figuras \ref{fig:princ-tempo}, \ref{fig:princ-comp} e \ref{fig:princ-trocas}
+apresentam, respectivamente, o tempo mediano, o número de comparações e o número de
+trocas para as três versões, em escala logarítmica nos dois eixos. As Tabelas
+\ref{tab:aleatorio} a \ref{tab:quaseordenado} trazem os valores numéricos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/principal_tempo.png}
+\caption{Tempo mediano de execução das três versões, por massa de teste.}
+\label{fig:princ-tempo}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/principal_comparacoes.png}
+\caption{Número médio de comparações das três versões, por massa de teste.}
+\label{fig:princ-comp}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/principal_trocas.png}
+\caption{Número médio de trocas (movimentações) das três versões, por massa de teste.}
+\label{fig:princ-trocas}
+\end{figure}
+\FloatBarrier
+
+\begin{table}[H]
+\centering
+\caption{Resultados para a massa Aleatório.}
+\label{tab:aleatorio}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
+\hline
+Recursivo & 1.000 & 0,037 & 13.374 & 2.602 \\
+Híbrido & 1.000 & 0,025 & 14.426 & 7.355 \\
+Mediana-3 & 1.000 & 0,026 & 13.846 & 7.736 \\
+\hline
+Recursivo & 10.000 & 0,438 & 180.022 & 33.586 \\
+Híbrido & 10.000 & 0,332 & 191.362 & 82.044 \\
+Mediana-3 & 10.000 & 0,338 & 180.820 & 85.022 \\
+\hline
+Recursivo & 100.000 & 5,187 & 2.238.090 & 412.988 \\
+Híbrido & 100.000 & 4,161 & 2.351.170 & 897.440 \\
+Mediana-3 & 100.000 & 4,206 & 2.242.550 & 923.525 \\
+\hline
+Recursivo & 500.000 & 28,873 & 13.041.400 & 2.332.570 \\
+Híbrido & 500.000 & 24,262 & 13.610.700 & 4.754.780 \\
+Mediana-3 & 500.000 & 24,330 & 12.386.100 & 4.911.090 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Resultados para a massa Ordenado.}
+\label{tab:ordenado}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
+\hline
+Recursivo & 1.000 & 0,004 & 9.009 & 511 \\
+Híbrido & 1.000 & 0,002 & 5.942 & 31 \\
+Mediana-3 & 1.000 & 0,002 & 6.004 & 31 \\
+\hline
+Recursivo & 10.000 & 0,056 & 125.439 & 5.904 \\
+Híbrido & 10.000 & 0,032 & 89.497 & 255 \\
+Mediana-3 & 10.000 & 0,032 & 90.007 & 255 \\
+\hline
+Recursivo & 100.000 & 0,701 & 1.600.020 & 65.535 \\
+Híbrido & 100.000 & 0,439 & 1.291.820 & 4.095 \\
+Mediana-3 & 100.000 & 0,437 & 1.300.010 & 4.095 \\
+\hline
+Recursivo & 500.000 & 3,588 & 9.000.020 & 262.143 \\
+Híbrido & 500.000 & 2,439 & 7.467.250 & 16.383 \\
+Mediana-3 & 500.000 & 2,452 & 7.500.010 & 16.383 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Resultados para a massa Inverso.}
+\label{tab:inverso}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
+\hline
+Recursivo & 1.000 & 0,005 & 9.016 & 1.010 \\
+Híbrido & 1.000 & 0,003 & 5.946 & 530 \\
+Mediana-3 & 1.000 & 0,003 & 6.009 & 530 \\
+\hline
+Recursivo & 10.000 & 0,060 & 125.452 & 10.904 \\
+Híbrido & 10.000 & 0,035 & 89.504 & 5.254 \\
+Mediana-3 & 10.000 & 0,036 & 90.015 & 5.254 \\
+\hline
+Recursivo & 100.000 & 0,723 & 1.600.030 & 115.534 \\
+Híbrido & 100.000 & 0,471 & 1.291.830 & 54.094 \\
+Mediana-3 & 100.000 & 0,486 & 1.300.020 & 54.094 \\
+\hline
+Recursivo & 500.000 & 3,748 & 9.000.030 & 512.142 \\
+Híbrido & 500.000 & 2,664 & 7.467.260 & 266.382 \\
+Mediana-3 & 500.000 & 2,664 & 7.500.030 & 266.382 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Resultados para a massa Repetidos (10 chaves distintas).}
+\label{tab:repetidos}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
+\hline
+Recursivo & 1.000 & 0,020 & 10.500 & 3.844 \\
+Híbrido & 1.000 & 0,014 & 7.946 & 2.607 \\
+Mediana-3 & 1.000 & 0,015 & 7.633 & 2.536 \\
+\hline
+Recursivo & 10.000 & 0,200 & 135.619 & 54.818 \\
+Híbrido & 10.000 & 0,157 & 102.243 & 33.791 \\
+Mediana-3 & 10.000 & 0,162 & 101.570 & 34.211 \\
+\hline
+Recursivo & 100.000 & 2,261 & 1.687.010 & 712.530 \\
+Híbrido & 100.000 & 1,783 & 1.357.200 & 500.738 \\
+Mediana-3 & 100.000 & 1,777 & 1.353.860 & 501.874 \\
+\hline
+Recursivo & 500.000 & 11,709 & 9.776.490 & 4.131.090 \\
+Híbrido & 500.000 & 9,215 & 8.124.660 & 3.068.950 \\
+Mediana-3 & 500.000 & 9,168 & 7.880.700 & 3.070.610 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Resultados para a massa Quase ordenado.}
+\label{tab:quaseordenado}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
+\hline
+Recursivo & 1.000 & 0,005 & 9.049 & 534 \\
+Híbrido & 1.000 & 0,003 & 6.008 & 73 \\
+Mediana-3 & 1.000 & 0,003 & 6.099 & 68 \\
+\hline
+Recursivo & 10.000 & 0,063 & 125.767 & 6.252 \\
+Híbrido & 10.000 & 0,039 & 90.778 & 1.159 \\
+Mediana-3 & 10.000 & 0,039 & 91.981 & 1.140 \\
+\hline
+Recursivo & 100.000 & 0,776 & 1.607.420 & 70.047 \\
+Híbrido & 100.000 & 0,521 & 1.302.120 & 12.210 \\
+Mediana-3 & 100.000 & 0,516 & 1.316.460 & 12.367 \\
+\hline
+Recursivo & 500.000 & 3,988 & 9.043.950 & 300.847 \\
+Híbrido & 500.000 & 2,927 & 7.527.610 & 69.366 \\
+Mediana-3 & 500.000 & 2,913 & 7.599.190 & 69.628 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Ganho das versões híbridas}
+
+A Figura \ref{fig:ganho} apresenta a redução percentual de tempo das versões
+híbridas em relação ao Quicksort recursivo puro.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{imagem/ganho_relativo.png}
+\caption{Redução do tempo de execução das versões híbridas em relação ao Quicksort recursivo.}
+\label{fig:ganho}
+\end{figure}
+\FloatBarrier
+
+O ganho é consistente: a redução de tempo varia entre \textbf{16\% e 45\%}, com
+mediana de \textbf{31\%}, sem que nenhuma configuração apresente prejuízo. Confirma-se,
+portanto, a hipótese que fundamenta a versão híbrida.
+
+Cabe observar que o ganho é maior nas massas com estrutura (Ordenado, Quase
+ordenado) do que na massa Aleatório. A razão é a adaptatividade do Insertion Sort
+discutida na Seção \ref{sec:insertion}: em subvetores quase ordenados, o número de
+deslocamentos é proporcional ao número de inversões, que é pequeno. Isso é visível na
+Tabela \ref{tab:ordenado}, em que o número de trocas cai de 262.143 para 16.383 em
+$n = 500.000$ --- redução de dezesseis vezes.
+
+\subsection{Efeito da mediana-de-três}
+\label{sec:efeito-mediana}
+
+A comparação entre as versões (b) e (c) exige cautela metodológica. Confrontar a
+versão com mediana-de-três ($M = 40$) diretamente com o Quicksort recursivo puro
+($M = 1$) faria variar \textbf{duas} grandezas simultaneamente --- o corte $M$ e a
+estratégia de pivô --- e atribuiria à mediana-de-três um ganho que decorre, em sua
+maior parte, do corte. Para isolar o efeito do pivô, as duas versões devem ser
+comparadas com o \textbf{mesmo valor de $M$}, conforme a Tabela \ref{tab:mediana3}.
+
+\begin{table}[H]
+\centering
+\caption{Redução do número de comparações da mediana-de-três em relação ao híbrido simples, ambos com $M = 40$.}
+\label{tab:mediana3}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Massa} & \textbf{$n$=1.000} & \textbf{$n$=10.000} & \textbf{$n$=100.000} & \textbf{$n$=500.000} \\
+\hline
+Aleatório & $+4{,}02\%$ & $+5{,}51\%$ & $+4{,}62\%$ & $+9{,}00\%$ \\
+Repetidos & $+3{,}94\%$ & $+0{,}66\%$ & $+0{,}25\%$ & $+3{,}00\%$ \\
+Ordenado & $-1{,}04\%$ & $-0{,}57\%$ & $-0{,}63\%$ & $-0{,}44\%$ \\
+Inverso & $-1{,}06\%$ & $-0{,}57\%$ & $-0{,}63\%$ & $-0{,}44\%$ \\
+Quase ordenado & $-1{,}51\%$ & $-1{,}33\%$ & $-1{,}10\%$ & $-0{,}95\%$ \\
+\hline
+\multicolumn{5}{l}{\footnotesize Valores positivos indicam vantagem da mediana-de-três.} \\
+\end{tabular}
+\end{table}
+
+O resultado é nítido e inteiramente explicado pela teoria:
+
+\begin{itemize}
+  \item Na massa \textbf{Aleatório}, a mediana-de-três reduz as comparações em 4\% a
+        9\%. O elemento central de um vetor aleatório é um elemento qualquer da
+        distribuição; a mediana de três amostras é um estimador melhor da mediana
+        verdadeira do subvetor, produzindo partições mais equilibradas. A magnitude
+        observada é compatível com a redução teórica de aproximadamente 14\% prevista
+        por \citeonline{sedgewick1978} --- a diferença decorre de o corte em $M = 40$
+        já eliminar as chamadas recursivas mais profundas, que são justamente aquelas
+        em que o desbalanceamento mais pesa;
+
+  \item Nas massas \textbf{Ordenado}, \textbf{Inverso} e \textbf{Quase ordenado}, a
+        mediana-de-três é aproximadamente 1\% \textbf{pior}. A explicação é direta:
+        em um vetor ordenado, o elemento central \textit{já é} a mediana exata do
+        subvetor. A mediana-de-três seleciona exatamente o mesmo pivô, produzindo
+        partições idênticas --- o que se confirma pelo número de trocas rigorosamente
+        igual nas Tabelas \ref{tab:ordenado} e \ref{tab:inverso} --- e gasta, além
+        disso, duas a três comparações adicionais por chamada.
+\end{itemize}
+
+Conclui-se que, quando comparada a um pivô central, \textbf{a mediana-de-três não
+apresenta vantagem sistemática}. Seu valor real manifesta-se na comparação com pivôs
+de \textbf{posição fixa}, como se demonstra na seção seguinte.
+
+\section{Pior caso forçado}
+\label{sec:res-piorcaso}
+
+Para forçar explicitamente o pior caso, combinou-se \textbf{vetor já ordenado} com
+\textbf{escolha inadequada de pivô} (primeiro elemento), conforme discutido na Seção
+\ref{sec:piorcaso}. A Tabela \ref{tab:piorcaso} e a Figura \ref{fig:piorcaso}
+apresentam os resultados.
+
+\begin{table}[H]
+\centering
+\caption{Pior caso forçado: vetor ordenado com pivô igual ao primeiro elemento.}
+\label{tab:piorcaso}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Comp./$n^2$} \\
+\hline
+Pivô = primeiro & 1.000 & 0,138 & 501.498 & 0,5015 \\
+Pivô = primeiro & 5.000 & 3,343 & 12.507.498 & 0,5003 \\
+Pivô = primeiro & 10.000 & 13,239 & 50.014.998 & 0,5001 \\
+Pivô = primeiro & 20.000 & 55,087 & 200.029.998 & 0,5001 \\
+Pivô = primeiro & 50.000 & 334,355 & 1.250.074.998 & 0,5000 \\
+\hline
+Recursivo (central) & 50.000 & 0,329 & 750.015 & 0,0003 \\
+Mediana-3 & 50.000 & 0,198 & 600.010 & 0,0002 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/pior_caso.png}
+\caption{Pior caso: número de comparações e razão comparações/$n^2$.}
+\label{fig:piorcaso}
+\end{figure}
+\FloatBarrier
+
+A razão comparações/$n^2$ converge para \textbf{exatamente $0{,}5000$}, confirmando
+numericamente a previsão teórica da Equação \ref{eq:piorcaso}, segundo a qual o pior
+caso executa $n(n-1)/2 \approx n^2/2$ comparações. O painel direito da Figura
+\ref{fig:piorcaso} torna essa constatação visual: a curva do pivô inadequado é
+horizontal, sobreposta ao limite teórico, enquanto as curvas das demais versões
+decrescem --- comportamento esperado de funções $\Theta(n \log n)$, cuja razão sobre
+$n^2$ tende a zero.
+
+Em números absolutos, para $n = 50.000$ a versão com pivô inadequado executa
+1.250.074.998 comparações contra 600.010 da versão com mediana-de-três: uma diferença
+de aproximadamente \textbf{2.000 vezes}, refletida em tempo de execução
+\textbf{1.700 vezes} maior (334,4 ms contra 0,198 ms).
+
+Cabe registrar uma consequência prática frequentemente esquecida. No pior caso, a
+profundidade da recursão é $n$, e não $O(\log n)$. Com a pilha padrão de 8 MB do
+sistema utilizado, entradas superiores a aproximadamente 100.000 elementos
+provocariam estouro de pilha --- motivo pelo qual este experimento foi limitado a
+$n = 50.000$. Trata-se de uma falha de natureza distinta da lentidão: o programa não
+apenas demora, ele termina anormalmente. Essa observação reforça o argumento de
+\citeonline{musser1997} em favor do monitoramento da profundidade de recursão.
+
+\section{Análise crítica}
+\label{sec:analise-critica}
+
+Dois resultados deste trabalho merecem análise mais detida, por contrariarem a
+intuição derivada exclusivamente da análise assintótica.
+
+\subsection{Mais comparações, menos tempo}
+
+Observe-se a massa Aleatório na Tabela \ref{tab:aleatorio}. Para $n = 100.000$, o
+Quicksort recursivo executa 2.238.090 comparações em 5,187 ms, enquanto a versão
+híbrida executa 2.351.170 comparações --- \textbf{5\% a mais} --- em 4,161 ms,
+sendo, portanto, \textbf{20\% mais rápida}. O mesmo padrão repete-se em todos os
+tamanhos, e também no número de trocas, que mais que dobra na versão híbrida.
+
+À primeira vista, o resultado é paradoxal: como pode um algoritmo que realiza mais
+operações elementares ser mais rápido? A explicação está no fato de que
+\textbf{nem toda operação elementar custa o mesmo}:
+
+\begin{enumerate}
+  \item \textbf{Custo por chamada recursiva.} Com $M = 1$, o Quicksort realiza
+        aproximadamente $n$ chamadas recursivas, cada uma com prólogo, epílogo,
+        manipulação de pilha e cálculo de pivô. Com $M = 40$, esse número cai
+        cerca de 40 vezes. As comparações economizadas na recursão são substituídas
+        por comparações do Insertion Sort, que não têm esse custo fixo associado;
+
+  \item \textbf{Localidade de referência.} O Insertion Sort opera sobre blocos
+        contíguos de no máximo 40 elementos --- 160 bytes, que cabem em três linhas de
+        cache. Todos os acessos ocorrem em cache L1. Já as chamadas recursivas
+        profundas do Quicksort tocam regiões dispersas do vetor;
+
+  \item \textbf{Predição de desvios.} O laço do Insertion Sort tem padrão de desvio
+        altamente previsível, ao passo que o desvio da partição do Quicksort depende
+        da comparação com o pivô e é, por construção, imprevisível --- cada erro de
+        predição custa entre 15 e 20 ciclos de \textit{pipeline}.
+\end{enumerate}
+
+Esse achado é coerente com a literatura recente discutida no Capítulo
+\ref{cap:referencial}: \citeonline{kushagra2014} atribuem os ganhos do Quicksort de
+múltiplos pivôs à redução de falhas de cache, e não à contagem de comparações, e
+\citeonline{edelkamp2019} obtêm ganhos expressivos atuando exclusivamente sobre a
+predição de desvios, sem alterar o número de comparações. A conclusão é que
+\textbf{a contagem de comparações, isoladamente, deixou de ser um preditor confiável
+do tempo de execução em hardware moderno} --- embora permaneça a métrica correta
+para caracterizar a complexidade assintótica.
+
+\subsection{O papel das métricas determinísticas}
+
+O segundo resultado é de natureza metodológica. Como relatado na Seção
+\ref{sec:medicao}, a primeira calibração de $M$ produziu um valor incorreto por
+contaminação da medição de tempo pelo governador de frequência do processador.
+
+O erro foi detectado porque \textbf{duas métricas mediam o mesmo fenômeno com
+naturezas distintas}: o número de comparações é determinístico e reprodutível bit a
+bit, enquanto o tempo é uma grandeza ruidosa. Quando as duas discordaram
+sistematicamente, a métrica determinística evidenciou a existência de um problema na
+medição.
+
+Esse é, precisamente, o motivo pelo qual o enunciado exige a manutenção de contadores
+de comparações e trocas \textbf{além} da medição de tempo. Os contadores não são
+apenas uma métrica complementar de desempenho: funcionam como instrumento de
+verificação da própria medição experimental. Sem eles, o valor incorreto de $M$
+teria sido incorporado a este relatório sem qualquer sintoma perceptível.

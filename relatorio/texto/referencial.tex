@@ -1,0 +1,193 @@
+\chapter{Referencial Teórico}
+\label{cap:referencial}
+
+Este capítulo apresenta os dois algoritmos de ordenação objeto deste trabalho ---
+o Insertion Sort e o Quicksort --- e a análise de complexidade de ambos, com ênfase
+nas condições que levam o Quicksort ao seu pior caso.
+
+\section{Ordenação por inserção}
+\label{sec:insertion}
+
+O \textit{Insertion Sort}, ou ordenação por inserção, constrói o vetor ordenado
+incrementalmente. A cada iteração $i$, o algoritmo assume que o prefixo
+$v[0..i-1]$ já está ordenado e insere $v[i]$ na posição correta desse prefixo,
+deslocando para a direita todos os elementos maiores que ele. É o método que,
+segundo \citeonline{ziviani2018}, corresponde à forma como um jogador ordena as
+cartas na mão.
+
+Sua análise é direta. Seja $C(n)$ o número de comparações entre chaves. No
+\textbf{melhor caso} --- vetor já ordenado --- cada elemento é comparado apenas com
+seu predecessor imediato e nenhum deslocamento ocorre, resultando em
+
+\begin{equation}
+C_{\min}(n) = n - 1 = \Theta(n).
+\end{equation}
+
+No \textbf{pior caso} --- vetor em ordem inversa --- o elemento $v[i]$ precisa ser
+comparado com todos os $i$ elementos anteriores, de modo que
+
+\begin{equation}
+C_{\max}(n) = \sum_{i=1}^{n-1} i = \frac{n(n-1)}{2} = \Theta(n^2).
+\end{equation}
+
+No \textbf{caso médio}, supondo permutações equiprováveis, cada elemento percorre
+em média metade do prefixo, resultando em aproximadamente $n^2/4$ comparações, o
+que também é $\Theta(n^2)$ \cite{cormen2022}.
+
+Apesar da complexidade quadrática, o Insertion Sort possui três propriedades que o
+tornam vantajoso para entradas pequenas, e que fundamentam sua utilização nas
+versões híbridas deste trabalho:
+
+\begin{enumerate}
+  \item \textbf{Constantes multiplicativas muito baixas}: o laço interno consiste em
+        uma comparação e uma atribuição, sem chamadas de função nem manipulação de
+        pilha;
+  \item \textbf{Adaptatividade}: em vetores quase ordenados o desempenho aproxima-se
+        do linear, pois o número de deslocamentos é proporcional ao número de
+        inversões da entrada;
+  \item \textbf{Localidade de referência}: os acessos são sequenciais e
+        contíguos, o que favorece a hierarquia de memória e a predição de desvios
+        dos processadores modernos.
+\end{enumerate}
+
+\section{Quicksort}
+\label{sec:quicksort}
+
+O Quicksort \cite{hoare1961,hoare1962} é um algoritmo de divisão e conquista. Dado
+um subvetor $v[esq..dir]$, escolhe-se um elemento como \textbf{pivô} e efetua-se a
+\textbf{partição}: rearranja-se o subvetor de modo que todos os elementos menores ou
+iguais ao pivô fiquem à sua esquerda e todos os maiores ou iguais, à sua direita.
+Em seguida, o procedimento é aplicado recursivamente às duas partes. Diferentemente
+do Mergesort, não há etapa de combinação: quando as chamadas recursivas retornam, o
+vetor já está ordenado.
+
+Este trabalho adota o esquema de partição de \citeonline{hoare1962} na forma
+apresentada por \citeonline{ziviani2018}, em que dois índices caminham em sentidos
+opostos até se cruzarem, trocando os elementos que se encontram no lado errado do
+pivô. O pivô é tratado como \textbf{valor}, e não como posição; como esse valor é
+sempre retirado do próprio subvetor, ele funciona como sentinela natural e garante a
+terminação dos laços internos.
+
+\subsection{Análise de complexidade}
+
+O custo do Quicksort é determinado pelo \textbf{balanceamento das partições}. A
+partição de um subvetor de tamanho $n$ custa $\Theta(n)$ comparações, e a recorrência
+geral é
+
+\begin{equation}
+T(n) = T(k) + T(n - k - 1) + \Theta(n),
+\end{equation}
+
+onde $k$ é o tamanho da partição esquerda.
+
+\paragraph{Melhor caso.} Quando o pivô é sempre a mediana exata, tem-se
+$k \approx n/2$ e a recorrência torna-se $T(n) = 2T(n/2) + \Theta(n)$, cuja solução,
+pelo Teorema Mestre, é
+
+\begin{equation}
+T_{\min}(n) = \Theta(n \log n).
+\end{equation}
+
+\paragraph{Caso médio.} Supondo que todas as permutações da entrada sejam
+equiprováveis, o número esperado de comparações é
+
+\begin{equation}
+C_{\text{méd}}(n) \approx 2n \ln n \approx 1{,}386\, n \log_2 n,
+\end{equation}
+
+conforme demonstrado por \citeonline{hoare1962} e detalhado por
+\citeonline{knuth1998}. O caso médio é, portanto, apenas cerca de 39\% pior que o
+melhor caso --- resultado que explica a robustez prática do algoritmo.
+
+\paragraph{Pior caso.} Quando o pivô é sistematicamente o menor ou o maior elemento
+do subvetor, tem-se $k = 0$ a cada chamada, e a recorrência degenera para
+$T(n) = T(n-1) + \Theta(n)$, cuja solução é
+
+\begin{equation}
+C_{\max}(n) = \sum_{i=1}^{n-1}(n - i) = \frac{n(n-1)}{2} \approx \frac{n^2}{2} = \Theta(n^2).
+\label{eq:piorcaso}
+\end{equation}
+
+Além do custo quadrático em tempo, o pior caso produz uma cadeia de recursão de
+profundidade $n$, elevando o consumo de memória de $O(\log n)$ para $O(n)$ e podendo
+provocar estouro de pilha.
+
+\subsection{Como o pior caso ocorre}
+\label{sec:piorcaso}
+
+O ponto central --- e frequentemente contraintuitivo --- é que o pior caso do
+Quicksort \textbf{não é uma propriedade da entrada isoladamente, mas da interação
+entre a entrada e a regra de escolha do pivô}. Não existe entrada intrinsecamente
+``ruim''; existe entrada ruim \textit{para uma dada estratégia de pivô}.
+
+Se a estratégia adotada é ``pivô = primeiro elemento'', um vetor já ordenado é o
+pior caso: o menor elemento é escolhido como pivô a cada chamada, produzindo
+partições de tamanhos $0$ e $n-1$. Esse é um cenário particularmente perigoso na
+prática, pois vetores já ordenados ou quase ordenados são extremamente comuns em
+sistemas reais --- exatamente a situação em que a implementação ingênua falha.
+
+Se a estratégia é ``pivô = elemento central'', o vetor ordenado passa a ser o
+\textbf{melhor} caso, pois o elemento central de um vetor ordenado é precisamente sua
+mediana. Ainda assim, é possível construir entradas adversárias que forçam o
+comportamento quadrático, como demonstrado por \citeonline{bentley1993}, que
+apresentam um método sistemático para gerar entradas patológicas contra qualquer
+regra determinística de escolha de pivô.
+
+\section{Aprimoramentos clássicos}
+
+\subsection{Corte para Insertion Sort}
+
+A ideia de interromper a recursão em subvetores pequenos e finalizar a ordenação com
+Insertion Sort foi proposta por \citeonline{singleton1969} e analisada em detalhe por
+\citeonline{sedgewick1978}. A justificativa é que, embora o Insertion Sort seja
+$\Theta(n^2)$, sua constante multiplicativa é muito menor que a do Quicksort; abaixo
+de um limiar $M$, o termo quadrático com constante pequena é menor que o termo
+$n\log n$ com constante grande.
+
+\citeonline{sedgewick1978} sugere valores de $M$ entre 5 e 25, faixa reproduzida em
+\citeonline{sedgewick2011}. Ressalte-se, entretanto, que tais valores foram obtidos
+em hardware da década de 1970; um dos objetivos deste trabalho é justamente
+determinar $M$ empiricamente na arquitetura atual.
+
+\subsection{Mediana-de-três}
+
+A escolha do pivô como mediana entre $v[esq]$, $v[meio]$ e $v[dir]$ também é atribuída
+a \citeonline{singleton1969}. A técnica tem dois efeitos: melhora a estimativa da
+mediana verdadeira do subvetor, reduzindo o desbalanceamento esperado das partições,
+e elimina o comportamento quadrático em entradas ordenadas e inversamente ordenadas.
+
+\citeonline{sedgewick1978} demonstra que a mediana-de-três reduz o número esperado de
+comparações no caso médio de $2n\ln n$ para aproximadamente $\frac{12}{7} n \ln n$, uma
+redução em torno de 14\%. É importante observar, contudo, que a técnica \textbf{não
+elimina} o pior caso: ela apenas torna as entradas patológicas mais difíceis de
+ocorrer por acaso. \citeonline{musser1997} demonstra esse ponto e propõe o
+\textit{Introsort}, que monitora a profundidade da recursão e alterna para Heapsort
+quando ela excede $2\log_2 n$, garantindo $O(n \log n)$ no pior caso. Essa é a
+estratégia adotada pela função \texttt{std::sort} da biblioteca padrão do C++.
+
+\section{Trabalhos recentes}
+
+A pesquisa sobre Quicksort permanece ativa, com foco no aproveitamento das
+características do hardware moderno.
+
+\citeonline{wild2012} realizam a análise de caso médio do Quicksort de pivô duplo de
+Yaroslavskiy, adotado no Java 7, mostrando que ele executa cerca de 5\% menos
+comparações que a versão de pivô único --- resultado estendido por
+\citeonline{kushagra2014} para múltiplos pivôs, que atribuem o ganho real à redução
+do número de falhas de cache, e não à contagem de comparações.
+
+\citeonline{edelkamp2019} propõem o \textit{BlockQuicksort}, que reorganiza a
+partição em blocos a fim de eliminar desvios condicionais dependentes de dados,
+obtendo ganhos de até 80\% em relação ao \texttt{std::sort} ao evitar erros de
+predição de desvio. \citeonline{aumuller2021} simplificam a técnica usando o esquema
+de partição de Lomuto. Na mesma linha, \citeonline{peters2021} apresenta o
+\textit{pattern-defeating quicksort} (pdqsort), que combina detecção de padrões na
+entrada com partição sem desvios, hoje adotado pela biblioteca padrão da linguagem
+Rust. \citeonline{axtmann2022} estendem essas ideias para o contexto paralelo de
+memória compartilhada.
+
+O ponto comum a esses trabalhos é relevante para a análise deste trabalho: em
+hardware moderno, \textbf{o número de comparações deixou de ser um bom preditor
+isolado do tempo de execução}. Efeitos de cache e de predição de desvios respondem
+por parcela significativa do custo real, o que será observado experimentalmente no
+Capítulo \ref{cap:resultados}.

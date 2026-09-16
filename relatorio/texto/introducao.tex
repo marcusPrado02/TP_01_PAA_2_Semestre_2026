@@ -1,0 +1,66 @@
+\chapter{Introdução}
+\label{cap:introducao}
+
+A ordenação é uma das operações mais estudadas da Ciência da Computação, tanto por
+sua ubiquidade prática quanto por seu papel didático na análise de algoritmos.
+Segundo \citeonline{knuth1998}, estima-se que uma fração expressiva de todo o tempo
+de processamento gasto em sistemas computacionais seja dedicada a ordenar dados ou
+a manter dados ordenados. Ordenar não é apenas um fim em si: é a etapa que viabiliza
+busca binária, junções eficientes em bancos de dados, algoritmos de geometria
+computacional e compressão de dados.
+
+Entre os algoritmos de ordenação interna, o \textit{Quicksort}, proposto por
+\citeonline{hoare1962}, ocupa posição de destaque. Seu tempo médio de execução é
+$O(n \log n)$ com constantes multiplicativas pequenas, e ele opera essencialmente
+\textit{in place}, exigindo memória auxiliar apenas para a pilha de recursão.
+Por esse motivo é o algoritmo adotado, em variantes refinadas, pelas bibliotecas
+padrão de praticamente todas as linguagens de programação de uso geral.
+
+O Quicksort, contudo, apresenta duas fragilidades bem conhecidas. A primeira é seu
+pior caso: quando o pivô escolhido é sistematicamente o menor ou o maior elemento do
+subvetor, as partições tornam-se maximamente desbalanceadas e o algoritmo degenera
+para $\Theta(n^2)$ comparações. A segunda é de natureza prática: para subvetores
+pequenos, o custo fixo da recursão e da partição supera o benefício da estratégia de
+divisão e conquista, e algoritmos assintoticamente piores --- como o
+\textit{Insertion Sort} --- tornam-se efetivamente mais rápidos.
+
+\section{Problema}
+
+Este trabalho trata do seguinte problema: \textbf{quanto se ganha, na prática, ao
+corrigir essas duas fragilidades do Quicksort, e sob quais condições cada correção
+compensa?} A pergunta não é respondida apenas pela análise assintótica, uma vez que
+ambas as correções preservam a complexidade $O(n \log n)$ do caso médio e atuam
+justamente sobre as constantes multiplicativas que a notação assintótica descarta.
+
+\section{Objetivos}
+
+O objetivo geral é realizar um estudo comparativo experimental de três
+implementações do Quicksort, conforme o exercício 15 do capítulo 4 de
+\citeonline{ziviani2018}:
+
+\begin{enumerate}
+  \item \textbf{Quicksort recursivo}: versão clássica, com recursão até subvetores
+        unitários;
+  \item \textbf{Quicksort híbrido}: versão em que a partição é interrompida para
+        subvetores com menos de $M$ elementos, os quais são ordenados por Insertion
+        Sort, sendo o valor de $M$ determinado empiricamente;
+  \item \textbf{Quicksort híbrido com mediana-de-três}: aprimoramento da versão
+        anterior, em que o pivô é a mediana entre o primeiro, o central e o último
+        elemento do subvetor.
+\end{enumerate}
+
+São objetivos específicos: (i) determinar empiricamente o valor de $M$; (ii) medir
+tempo de execução, número de comparações e número de trocas sobre massas de teste
+variadas; (iii) forçar explicitamente o pior caso do Quicksort e verificar
+experimentalmente seu comportamento quadrático; e (iv) analisar criticamente os
+resultados à luz da teoria, justificando as diferenças observadas entre as versões.
+
+\section{Organização do trabalho}
+
+O Capítulo \ref{cap:referencial} apresenta o referencial teórico, com a descrição
+dos algoritmos Insertion Sort e Quicksort e a análise de complexidade de ambos,
+com destaque para o pior caso do Quicksort. O Capítulo \ref{cap:metodologia}
+descreve a metodologia adotada, incluindo as massas de teste, as convenções de
+contagem e os cuidados tomados na medição de tempo. O Capítulo
+\ref{cap:resultados} apresenta e analisa os resultados obtidos. O Capítulo
+\ref{cap:conclusao} sintetiza as conclusões do trabalho.

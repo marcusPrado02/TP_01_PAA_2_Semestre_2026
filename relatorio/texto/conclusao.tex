@@ -1,0 +1,70 @@
+\chapter{Conclusão}
+\label{cap:conclusao}
+
+Este trabalho realizou um estudo comparativo experimental de três implementações do
+Quicksort --- recursivo puro, híbrido com Insertion Sort e híbrido com
+mediana-de-três --- avaliadas sobre cinco massas de teste e quatro tamanhos de
+entrada, com medição de tempo de execução, número de comparações e número de trocas.
+
+Quanto ao \textbf{primeiro objetivo específico}, a calibração empírica indicou
+$M \approx 30$--$40$ como faixa ótima, com platô de bom desempenho entre 20 e 70. O
+valor adotado, $M = 40$, mostrou-se estável entre execuções independentes, entre
+tamanhos de entrada e entre estratégias de pivô. Esse valor é superior à faixa de 5 a
+25 recomendada por \citeonline{sedgewick1978}, diferença atribuída à evolução do
+hardware: em processadores atuais, a localidade de cache e a previsibilidade de
+desvios do Insertion Sort deslocam o ponto de equilíbrio para valores maiores.
+
+Quanto ao \textbf{segundo objetivo}, as versões híbridas reduziram o tempo de
+execução entre 16\% e 45\% em relação ao Quicksort recursivo puro, com mediana de
+31\%, sem prejuízo em nenhuma configuração testada. O ganho foi maior nas massas com
+estrutura, em razão da adaptatividade do Insertion Sort.
+
+Quanto ao \textbf{terceiro objetivo}, o experimento de pior caso confirmou
+numericamente a previsão teórica: a razão comparações/$n^2$ convergiu para exatamente
+$0{,}5000$, correspondendo às $n(n-1)/2$ comparações previstas pela análise. Para
+$n = 50.000$, a diferença entre a escolha inadequada e a adequada de pivô alcançou
+aproximadamente 2.000 vezes em número de comparações e 1.700 vezes em tempo de
+execução.
+
+Quanto ao \textbf{quarto objetivo}, a análise crítica produziu dois resultados que
+merecem destaque.
+
+O primeiro é que a mediana-de-três, quando comparada ao pivô central \textbf{com o
+mesmo valor de $M$}, não apresenta vantagem sistemática: reduz as comparações em 4\%
+a 9\% apenas em dados aleatórios e é cerca de 1\% pior em entradas ordenadas,
+inversas e quase ordenadas. O resultado é plenamente explicado pela teoria --- em um
+vetor ordenado o elemento central já é a mediana exata do subvetor, de modo que a
+técnica seleciona o mesmo pivô e gasta comparações adicionais sem contrapartida. Seu
+valor real reside na proteção contra pivôs de posição fixa, cenário em que a
+diferença é de três ordens de grandeza. Cabe destacar que esse resultado só se
+tornou visível porque as duas versões foram comparadas mantendo $M$ constante;
+compará-las com valores distintos de $M$ atribuiria à mediana-de-três um ganho que
+decorre, na verdade, do corte.
+
+O segundo é que a versão híbrida executa \textit{mais} comparações e \textit{mais}
+trocas que o Quicksort recursivo em dados aleatórios e, ainda assim, é
+consistentemente mais rápida. Isso evidencia que a contagem de operações
+elementares, embora seja a métrica correta para a análise assintótica, deixou de ser
+um preditor confiável do tempo de execução em hardware moderno, no qual efeitos de
+cache e de predição de desvios respondem por parcela expressiva do custo real --- em
+consonância com \citeonline{kushagra2014} e \citeonline{edelkamp2019}.
+
+Registra-se, por fim, uma contribuição de natureza metodológica. A primeira
+calibração realizada produziu um valor incorreto de $M$ em virtude do aquecimento do
+processador, viés sistemático que não é corrigido pela simples repetição das
+execuções. O erro foi detectado pela discordância entre o tempo medido e o número de
+comparações --- métrica determinística e imune ao efeito. Conclui-se que os
+contadores exigidos pelo enunciado desempenham papel que extrapola a caracterização
+de desempenho: constituem instrumento de verificação da validade da própria medição
+experimental.
+
+\section{Trabalhos futuros}
+
+Como desdobramentos naturais deste estudo, sugerem-se: a implementação do
+\textit{Introsort} de \citeonline{musser1997}, que garante $O(n\log n)$ no pior caso
+mediante monitoramento da profundidade de recursão; a avaliação do Quicksort de pivô
+duplo analisado por \citeonline{wild2012}; e a implementação das técnicas de partição
+sem desvios propostas por \citeonline{edelkamp2019} e \citeonline{peters2021}, cujo
+ganho, segundo os autores, decorre de fatores que a análise assintótica clássica não
+captura --- hipótese que os resultados da Seção \ref{sec:analise-critica} deste
+trabalho corroboram.

@@ -1,0 +1,114 @@
+%----------------------------------------------------------------------
+% Reiniciar numeração das figuras que aparecem no apêndice
+\setcounter{figure}{0}
+
+\chapter{Código-fonte das implementações}
+\label{apend:codigo}
+
+\vspace{-1.9cm}
+
+O código-fonte completo, os arquivos de resultados em formato CSV e os scripts de
+geração dos gráficos estão disponíveis no repositório do trabalho. Reproduzem-se a
+seguir os trechos essenciais das implementações.
+
+\section{Insertion Sort}
+
+\begin{lstlisting}[language=C++,caption={Ordenação por inserção do subvetor \texttt{v[esq..dir]}.}]
+void insertionSort(std::vector<int>& v, int esq, int dir, Contadores& c) {
+    for (int i = esq + 1; i <= dir; ++i) {
+        const int chave = v[i];
+        int j = i - 1;
+        // Desloca para a direita todos os elementos maiores que 'chave'.
+        while (j >= esq) {
+            ++c.comparacoes;
+            if (v[j] <= chave) break;
+            v[j + 1] = v[j];
+            ++c.trocas;
+            --j;
+        }
+        if (j + 1 != i) {
+            v[j + 1] = chave;
+        }
+    }
+}
+\end{lstlisting}
+
+\section{Partição de Hoare}
+
+\begin{lstlisting}[language=C++,caption={Partição em torno do valor do pivô. Ao final, \texttt{v[esq..j]} contém os elementos menores ou iguais ao pivô e \texttt{v[i..dir]}, os maiores ou iguais.}]
+static void particao(std::vector<int>& v, int esq, int dir,
+                     int& i, int& j, int pivo, Contadores& c) {
+    i = esq;
+    j = dir;
+    do {
+        while (true) { ++c.comparacoes; if (v[i] >= pivo) break; ++i; }
+        while (true) { ++c.comparacoes; if (v[j] <= pivo) break; --j; }
+        if (i <= j) {
+            std::swap(v[i], v[j]);
+            ++c.trocas;
+            ++i;
+            --j;
+        }
+    } while (i <= j);
+}
+\end{lstlisting}
+
+\section{Escolha do pivô}
+
+\begin{lstlisting}[language=C++,caption={Mediana de três valores, com contagem de comparações.}]
+static int mediana3(int a, int b, int d, Contadores& c) {
+    ++c.comparacoes;
+    if (a > b) std::swap(a, b);   // garante a <= b
+    ++c.comparacoes;
+    if (b > d) {                  // a <= b e d < b: mediana e max(a,d)
+        ++c.comparacoes;
+        return (a > d) ? a : d;
+    }
+    return b;                     // a <= b <= d
+}
+
+static int escolherPivo(const std::vector<int>& v, int esq, int dir,
+                        EstrategiaPivo p, Contadores& c) {
+    const int meio = esq + (dir - esq) / 2;   // evita overflow de (esq+dir)/2
+    switch (p) {
+        case EstrategiaPivo::PRIMEIRO: return v[esq];
+        case EstrategiaPivo::MEIO:     return v[meio];
+        case EstrategiaPivo::MEDIANA3: return mediana3(v[esq], v[meio], v[dir], c);
+    }
+    return v[meio];
+}
+\end{lstlisting}
+
+\section{Motor único das três versões}
+
+\begin{lstlisting}[language=C++,caption={Motor parametrizado pelo corte \texttt{M} e pela estratégia de pivô.}]
+static void ordena(std::vector<int>& v, int esq, int dir,
+                   Contadores& c, int M, EstrategiaPivo p) {
+    if (esq >= dir) return;
+
+    // Interrompe a particao para subvetores com MENOS de M elementos.
+    // Com M <= 1 nenhum subvetor nao trivial e interrompido, e o algoritmo
+    // degenera na versao recursiva pura.
+    if (dir - esq + 1 < M) {
+        insertionSort(v, esq, dir, c);
+        return;
+    }
+
+    int i, j;
+    const int pivo = escolherPivo(v, esq, dir, p, c);
+    particao(v, esq, dir, i, j, pivo, c);
+    ordena(v, esq, j, c, M, p);
+    ordena(v, i, dir, c, M, p);
+}
+
+// As tres versoes exigidas sao atalhos com parametros fixos:
+void quicksortRecursivo(std::vector<int>& v, Contadores& c, EstrategiaPivo p) {
+    quicksort(v, c, 1, p);
+}
+void quicksortHibrido(std::vector<int>& v, Contadores& c, int M) {
+    quicksort(v, c, M, EstrategiaPivo::MEIO);
+}
+void quicksortHibridoMediana3(std::vector<int>& v, Contadores& c, int M) {
+    quicksort(v, c, M, EstrategiaPivo::MEDIANA3);
+}
+\end{lstlisting}

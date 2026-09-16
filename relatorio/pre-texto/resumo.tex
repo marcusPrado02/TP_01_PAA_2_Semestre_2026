@@ -1,0 +1,35 @@
+% Resumo
+\begin{resumo}
+\vspace{-1cm}
+\onehalfspacing
+
+\noindent Este trabalho apresenta um estudo comparativo experimental de três
+implementações do algoritmo Quicksort: a versão recursiva clássica, uma versão
+híbrida em que a partição é interrompida para subvetores com menos de $M$ elementos,
+os quais são ordenados por Insertion Sort, e uma versão híbrida com escolha de pivô
+por mediana-de-três. As implementações foram desenvolvidas em C++17 sobre um motor
+único parametrizado, de modo a garantir que as três variantes contabilizem
+comparações e trocas de forma idêntica. Os algoritmos foram avaliados sobre cinco
+massas de teste --- aleatória, ordenada, inversamente ordenada, com muitos elementos
+repetidos e quase ordenada --- em quatro tamanhos de entrada, entre mil e quinhentos
+mil elementos, medindo-se tempo de execução, número de comparações e número de
+trocas. A calibração empírica indicou $M \approx 40$ como valor ótimo, superior à
+faixa de 5 a 25 recomendada pela literatura clássica, diferença atribuída às
+características do hardware atual. As versões híbridas reduziram o tempo de execução
+entre 16\% e 45\% em relação à versão recursiva pura. Um experimento específico
+forçou o pior caso do algoritmo, combinando vetor ordenado com escolha inadequada de
+pivô, e confirmou numericamente a previsão teórica: a razão entre o número de
+comparações e $n^2$ convergiu para exatamente $0{,}5000$, com diferença de
+aproximadamente duas mil vezes em relação à versão com mediana-de-três. A análise
+crítica revelou que, em dados aleatórios, a versão híbrida executa mais comparações
+que a versão recursiva e ainda assim é mais rápida, evidenciando que a contagem de
+operações elementares deixou de ser preditor confiável do tempo de execução em
+hardware moderno.
+
+\vspace*{.75cm}
+
+\noindent \textbf{Palavras-chave:} Quicksort, Insertion Sort, Algoritmos de
+Ordenação, Análise de Complexidade, Análise Experimental de Algoritmos,
+Mediana-de-três.
+
+\end{resumo}

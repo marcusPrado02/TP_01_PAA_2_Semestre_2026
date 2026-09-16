@@ -1,0 +1,33 @@
+% Abstract
+\begin{abstract}
+\vspace{-1cm}
+\onehalfspacing
+
+\noindent This work presents an experimental comparative study of three
+implementations of the Quicksort algorithm: the classical recursive version, a hybrid
+version in which partitioning stops for subarrays with fewer than $M$ elements, which
+are then sorted by Insertion Sort, and a hybrid version using median-of-three pivot
+selection. The implementations were developed in C++17 on top of a single
+parameterised engine, ensuring that all three variants count comparisons and swaps
+identically. The algorithms were evaluated on five test datasets --- random, sorted,
+reverse sorted, with many repeated elements, and nearly sorted --- across four input
+sizes ranging from one thousand to five hundred thousand elements, measuring
+execution time, comparison count and swap count. Empirical calibration indicated
+$M \approx 40$ as the optimal value, higher than the range of 5 to 25 recommended by
+the classical literature, a difference attributed to modern hardware characteristics.
+The hybrid versions reduced execution time by 16\% to 45\% compared to the pure
+recursive version. A dedicated experiment forced the algorithm's worst case by
+combining a sorted array with an inadequate pivot choice, numerically confirming the
+theoretical prediction: the ratio between comparison count and $n^2$ converged to
+exactly $0.5000$, a difference of approximately two thousand times relative to the
+median-of-three version. The critical analysis revealed that, on random data, the
+hybrid version performs more comparisons than the recursive version yet remains
+faster, showing that counting elementary operations is no longer a reliable predictor
+of execution time on modern hardware.
+
+\vspace*{.75cm}
+
+\noindent \textbf{Keywords:} Quicksort, Insertion Sort, Sorting Algorithms,
+Complexity Analysis, Experimental Algorithmics, Median-of-three.
+
+\end{abstract}

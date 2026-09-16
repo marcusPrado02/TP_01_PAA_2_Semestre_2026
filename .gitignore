@@ -67,3 +67,12 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+TP - quicksort (1).pdf
+# Makefile do projeto (a regra acima visa Makefiles gerados pelo CMake)
+!Makefile
+
+# Binarios e saidas do projeto
+bin/
+Rascunho___Trabalho_Eletronica___Relatório_final___Conversor_DA (2).zip
+relatorio-overleaf.zip
