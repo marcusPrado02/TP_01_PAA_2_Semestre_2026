@@ -100,7 +100,7 @@ Detalhes da montagem:
 - Os containers escrevem com o `UID`/`GID` do usuário (`user:` no compose), de
   modo que os arquivos gerados não ficam como `root`.
 - **Sem limite de CPU** no serviço `experimentos`: restringir `cpus` distorceria
-  as medidas de tempo do trabalho. Rode com a máquina ociosa.
+  as medidas de tempo do trabalho.
 
 ---
 
