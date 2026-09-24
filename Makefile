@@ -7,9 +7,10 @@ ALVO      = $(BINDIR)/quicksort
 FONTES    = $(wildcard $(SRCDIR)/*.cpp)
 OBJETOS   = $(FONTES:$(SRCDIR)/%.cpp=$(BINDIR)/%.o)
 
-.PHONY: all validar calibrar experimentos pior-caso tudo graficos limpar \
+.PHONY: all validar calibrar experimentos pior-caso tudo graficos overleaf-zip limpar \
         docker-build docker-tudo docker-validar docker-calibrar \
-        docker-experimentos docker-pior-caso docker-graficos docker-relatorio docker-up
+        docker-experimentos docker-pior-caso docker-graficos docker-relatorio \
+        docker-overleaf docker-up
 
 all: $(ALVO)
 
@@ -42,6 +43,10 @@ tudo: $(ALVO) resultados
 
 graficos:
 	python3 scripts/graficos.py
+
+# Empacota o relatorio em relatorio-overleaf.zip para upload no Overleaf.
+overleaf-zip:
+	python3 scripts/overleaf_zip.py
 
 limpar:
 	rm -rf $(BINDIR)
@@ -79,6 +84,10 @@ docker-graficos:
 # Compila o relatorio (relatorio/Projeto.pdf) com pdflatex + bibtex.
 docker-relatorio:
 	docker compose run --rm --no-deps relatorio
+
+# Gera o ZIP para upload no Overleaf (relatorio-overleaf.zip).
+docker-overleaf:
+	docker compose run --rm --no-deps overleaf
 
 # Sobe os dois servicos em sequencia, respeitando o depends_on.
 docker-up:

@@ -28,6 +28,7 @@ make experimentos         # bateria principal
 make pior-caso            # experimento de pior caso forçado
 make tudo                 # executa tudo (≈ 20 s)
 make graficos             # gera gráficos e tabelas LaTeX (requer matplotlib/pandas)
+make overleaf-zip         # gera relatorio-overleaf.zip para upload no Overleaf
 make limpar
 ```
 
@@ -43,7 +44,7 @@ tabelas prontas para o Overleaf, em `graficos/`.
 Para rodar tudo em containers, sem instalar compilador nem matplotlib/pandas:
 
 ```bash
-make docker-build          # constrói as duas imagens
+make docker-build          # constrói as imagens
 make docker-tudo           # bateria completa + gráficos
 make docker-validar        # só a validação de corretude
 make docker-calibrar       # só a calibração de M
@@ -51,6 +52,7 @@ make docker-experimentos   # só a bateria principal
 make docker-pior-caso      # só o pior caso
 make docker-graficos       # só os gráficos (usa CSVs já existentes)
 make docker-relatorio      # compila relatorio/Projeto.pdf (pdflatex + bibtex)
+make docker-overleaf       # gera relatorio-overleaf.zip (upload no Overleaf)
 make docker-up             # sobe os dois serviços em sequência (depends_on)
 ```
 
@@ -68,6 +70,7 @@ diretamente, então funcionam sem `make`, `g++` ou Python no host.
 ./scripts/linux/gerar-testes.sh [validar|calibrar|experimentos|pior-caso|tudo]
 ./scripts/linux/gerar-graficos.sh
 ./scripts/linux/gerar-relatorio.sh
+./scripts/linux/gerar-overleaf.sh
 ./scripts/linux/fluxo-completo.sh [--pausar]
 ```
 
@@ -77,6 +80,7 @@ diretamente, então funcionam sem `make`, `g++` ou Python no host.
 .\scripts\windows\gerar-testes.ps1 [validar|calibrar|experimentos|pior-caso|tudo]
 .\scripts\windows\gerar-graficos.ps1
 .\scripts\windows\gerar-relatorio.ps1
+.\scripts\windows\gerar-overleaf.ps1
 .\scripts\windows\fluxo-completo.ps1 [-Pausar]
 ```
 
@@ -94,6 +98,8 @@ Detalhes da montagem:
 - `docker/relatorio.Dockerfile` — imagem `debian:bookworm-slim` com TeX Live via
   `apt` (não a imagem oficial `texlive/texlive`, ~5 GB). Os `.sty`/`.cls` ABNT
   vêm do próprio repositório; o container só fornece o motor LaTeX e os pacotes.
+- `docker/overleaf.Dockerfile` — imagem `python:3.12-slim`; roda o script que
+  empacota `relatorio/` em `relatorio-overleaf.zip`.
 - `docker-compose.yml` — monta o repositório em `/app` (bind mount), então os
   CSVs, PNGs e o PDF saem no host. O serviço `graficos` depende do `experimentos`
   ter terminado com sucesso.
@@ -101,6 +107,28 @@ Detalhes da montagem:
   modo que os arquivos gerados não ficam como `root`.
 - **Sem limite de CPU** no serviço `experimentos`: restringir `cpus` distorceria
   as medidas de tempo do trabalho.
+
+### Envio do relatório para o Overleaf
+
+O `relatorio/` é autocontido (classe ABNT, `.sty`/`.bst` vendorizados,
+`Referencias.bib` e as figuras). O comando abaixo gera um ZIP com esse diretório,
+sem os arquivos intermediários do LaTeX:
+
+```bash
+make overleaf-zip          # ou: make docker-overleaf
+# ou, sem make:
+python3 scripts/overleaf_zip.py
+./scripts/linux/gerar-overleaf.sh
+```
+
+No Overleaf: **New Project → Upload Project**, selecione `relatorio-overleaf.zip`
+e defina `Projeto.tex` como documento principal (Settings → Main document),
+com o compilador **pdfLaTeX**.
+
+O Overleaf não sincroniza o repositório automaticamente: o *GitHub sync* é
+recurso pago, não aceita projetos já existentes e usa a raiz do repositório como
+raiz do projeto (o `Projeto.tex` está em `relatorio/`). Por isso o upload do ZIP
+é o caminho recomendado — repita-o sempre que o relatório mudar.
 
 ---
 
@@ -114,6 +142,7 @@ src/
   experimentos.hpp/cpp  medição, agregação estatística e as rotinas de experimento
   main.cpp          interface de linha de comando
 scripts/graficos.py gráficos (matplotlib) e tabelas LaTeX a partir dos CSVs
+scripts/overleaf_zip.py  empacota relatorio/ em relatorio-overleaf.zip
 resultados/         saídas em CSV
 graficos/           figuras .png e tabelas.tex
 ```

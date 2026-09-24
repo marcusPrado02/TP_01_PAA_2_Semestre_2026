@@ -5,6 +5,7 @@
 #   docker compose run --rm experimentos # make tudo (validar + calibrar + experimentos + pior-caso)
 #   docker compose run --rm graficos     # gera graficos/*.png e graficos/tabelas.tex
 #   docker compose run --rm relatorio    # compila relatorio/Projeto.pdf
+#   docker compose run --rm overleaf     # gera relatorio-overleaf.zip (upload no Overleaf)
 #   docker compose up --abort-on-container-exit   # executa os dois primeiros em sequencia
 #
 # O repositorio inteiro e montado em /app: os CSVs, PNGs e o PDF saem no host,
@@ -47,3 +48,11 @@ services:
       context: .
       dockerfile: docker/relatorio.Dockerfile
     image: tp-paa-quicksort-relatorio
+
+  # Parte 4: empacota o relatorio em ZIP para upload no Overleaf.
+  overleaf:
+    <<: *comum
+    build:
+      context: .
+      dockerfile: docker/overleaf.Dockerfile
+    image: tp-paa-quicksort-overleaf
