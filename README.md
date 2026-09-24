@@ -56,6 +56,35 @@ make docker-up             # sobe os dois serviços em sequência (depends_on)
 
 O parâmetro `M` também funciona: `make docker-tudo M=25`.
 
+### Scripts por sistema operacional
+
+Alternativa aos alvos `make`, útil para quem não tem `make` instalado (sobretudo
+no Windows). Dependem apenas do Docker. Os scripts chamam `docker compose`
+diretamente, então funcionam sem `make`, `g++` ou Python no host.
+
+**Linux/macOS** (`scripts/linux/`):
+
+```bash
+./scripts/linux/gerar-testes.sh [validar|calibrar|experimentos|pior-caso|tudo]
+./scripts/linux/gerar-graficos.sh
+./scripts/linux/gerar-relatorio.sh
+./scripts/linux/fluxo-completo.sh [--pausar]
+```
+
+**Windows/PowerShell** (`scripts/windows/`):
+
+```powershell
+.\scripts\windows\gerar-testes.ps1 [validar|calibrar|experimentos|pior-caso|tudo]
+.\scripts\windows\gerar-graficos.ps1
+.\scripts\windows\gerar-relatorio.ps1
+.\scripts\windows\fluxo-completo.ps1 [-Pausar]
+```
+
+`fluxo-completo` executa sequencialmente (experimentos → gráficos → cópia das
+figuras para `relatorio/imagem/` → compilação do relatório) e **por padrão não
+pausa**; use `--pausar`/`-Pausar` para interromper entre os passos.
+O parâmetro `M` é lido da variável de ambiente (`M=25 ./scripts/linux/fluxo-completo.sh`).
+
 Detalhes da montagem:
 
 - `docker/experimentos.Dockerfile` — imagem `gcc:13`; o `ENTRYPOINT` é `make`,
