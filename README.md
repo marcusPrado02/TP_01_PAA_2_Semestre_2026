@@ -38,6 +38,39 @@ tabelas prontas para o Overleaf, em `graficos/`.
 
 ---
 
+## Execução com Docker (sem instalar g++/Python no host)
+
+Para rodar tudo em containers, sem instalar compilador nem matplotlib/pandas:
+
+```bash
+make docker-build          # constrói as duas imagens
+make docker-tudo           # bateria completa + gráficos
+make docker-validar        # só a validação de corretude
+make docker-calibrar       # só a calibração de M
+make docker-experimentos   # só a bateria principal
+make docker-pior-caso      # só o pior caso
+make docker-graficos       # só os gráficos (usa CSVs já existentes)
+make docker-up             # sobe os dois serviços em sequência (depends_on)
+```
+
+O parâmetro `M` também funciona: `make docker-tudo M=25`.
+
+Detalhes da montagem:
+
+- `docker/experimentos.Dockerfile` — imagem `gcc:13`; o `ENTRYPOINT` é `make`,
+  então os argumentos viram alvos do Makefile.
+- `docker/graficos.Dockerfile` — imagem `python:3.12-slim` com matplotlib e
+  pandas fixados.
+- `docker-compose.yml` — monta o repositório em `/app` (bind mount), então os
+  CSVs e PNGs saem no host. O serviço `graficos` depende do `experimentos` ter
+  terminado com sucesso.
+- Os containers escrevem com o `UID`/`GID` do usuário (`user:` no compose), de
+  modo que os arquivos gerados não ficam como `root`.
+- **Sem limite de CPU** no serviço `experimentos`: restringir `cpus` distorceria
+  as medidas de tempo do trabalho. Rode com a máquina ociosa.
+
+---
+
 ## Organização do código
 
 ```

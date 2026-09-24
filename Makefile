@@ -7,7 +7,9 @@ ALVO      = $(BINDIR)/quicksort
 FONTES    = $(wildcard $(SRCDIR)/*.cpp)
 OBJETOS   = $(FONTES:$(SRCDIR)/%.cpp=$(BINDIR)/%.o)
 
-.PHONY: all validar calibrar experimentos pior-caso tudo graficos limpar
+.PHONY: all validar calibrar experimentos pior-caso tudo graficos limpar \
+        docker-build docker-tudo docker-validar docker-calibrar \
+        docker-experimentos docker-pior-caso docker-graficos docker-up
 
 all: $(ALVO)
 
@@ -43,3 +45,37 @@ graficos:
 
 limpar:
 	rm -rf $(BINDIR)
+
+# ---------------------------------------------------------------------------
+# Alvos com Docker (nao requerem g++/make/python/matplotlib no host)
+# ---------------------------------------------------------------------------
+
+# Constroi as duas imagens (experimentos em C++ e graficos em Python).
+docker-build:
+	docker compose build
+
+# Executa a bateria completa dentro do container e gera os graficos em seguida.
+docker-tudo:
+	docker compose run --rm experimentos tudo M=$(M)
+	docker compose run --rm --no-deps graficos
+
+# Etapas individuais da parte C++.
+docker-validar:
+	docker compose run --rm experimentos validar
+
+docker-calibrar:
+	docker compose run --rm experimentos calibrar
+
+docker-experimentos:
+	docker compose run --rm experimentos experimentos M=$(M)
+
+docker-pior-caso:
+	docker compose run --rm experimentos pior-caso M=$(M)
+
+# Gera apenas os graficos (requer resultados/*.csv ja existentes).
+docker-graficos:
+	docker compose run --rm --no-deps graficos
+
+# Sobe os dois servicos em sequencia, respeitando o depends_on.
+docker-up:
+	docker compose up --abort-on-container-exit
