@@ -50,6 +50,7 @@ make docker-calibrar       # só a calibração de M
 make docker-experimentos   # só a bateria principal
 make docker-pior-caso      # só o pior caso
 make docker-graficos       # só os gráficos (usa CSVs já existentes)
+make docker-relatorio      # compila relatorio/Projeto.pdf (pdflatex + bibtex)
 make docker-up             # sobe os dois serviços em sequência (depends_on)
 ```
 
@@ -61,9 +62,12 @@ Detalhes da montagem:
   então os argumentos viram alvos do Makefile.
 - `docker/graficos.Dockerfile` — imagem `python:3.12-slim` com matplotlib e
   pandas fixados.
+- `docker/relatorio.Dockerfile` — imagem `debian:bookworm-slim` com TeX Live via
+  `apt` (não a imagem oficial `texlive/texlive`, ~5 GB). Os `.sty`/`.cls` ABNT
+  vêm do próprio repositório; o container só fornece o motor LaTeX e os pacotes.
 - `docker-compose.yml` — monta o repositório em `/app` (bind mount), então os
-  CSVs e PNGs saem no host. O serviço `graficos` depende do `experimentos` ter
-  terminado com sucesso.
+  CSVs, PNGs e o PDF saem no host. O serviço `graficos` depende do `experimentos`
+  ter terminado com sucesso.
 - Os containers escrevem com o `UID`/`GID` do usuário (`user:` no compose), de
   modo que os arquivos gerados não ficam como `root`.
 - **Sem limite de CPU** no serviço `experimentos`: restringir `cpus` distorceria

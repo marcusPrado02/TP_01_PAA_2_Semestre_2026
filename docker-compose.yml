@@ -1,13 +1,14 @@
 # Ambiente containerizado do TP de PAA (Quicksort).
 #
 # Uso:
-#   docker compose build                 # constroi as duas imagens
+#   docker compose build                 # constroi as imagens
 #   docker compose run --rm experimentos # make tudo (validar + calibrar + experimentos + pior-caso)
 #   docker compose run --rm graficos     # gera graficos/*.png e graficos/tabelas.tex
-#   docker compose up --abort-on-container-exit   # executa os dois em sequencia
+#   docker compose run --rm relatorio    # compila relatorio/Projeto.pdf
+#   docker compose up --abort-on-container-exit   # executa os dois primeiros em sequencia
 #
-# O repositorio inteiro e montado em /app: os CSVs e PNGs saem no host, com o
-# mesmo dono (UID/GID do usuario), pois nao ha COPY do codigo para a imagem.
+# O repositorio inteiro e montado em /app: os CSVs, PNGs e o PDF saem no host,
+# com o mesmo dono (UID/GID do usuario), pois nao ha COPY do codigo para a imagem.
 
 x-comum: &comum
   volumes:
@@ -38,3 +39,11 @@ services:
     depends_on:
       experimentos:
         condition: service_completed_successfully
+
+  # Parte 3: compilacao do relatorio em LaTeX (pdflatex + bibtex).
+  relatorio:
+    <<: *comum
+    build:
+      context: .
+      dockerfile: docker/relatorio.Dockerfile
+    image: tp-paa-quicksort-relatorio

@@ -9,7 +9,7 @@ OBJETOS   = $(FONTES:$(SRCDIR)/%.cpp=$(BINDIR)/%.o)
 
 .PHONY: all validar calibrar experimentos pior-caso tudo graficos limpar \
         docker-build docker-tudo docker-validar docker-calibrar \
-        docker-experimentos docker-pior-caso docker-graficos docker-up
+        docker-experimentos docker-pior-caso docker-graficos docker-relatorio docker-up
 
 all: $(ALVO)
 
@@ -75,6 +75,10 @@ docker-pior-caso:
 # Gera apenas os graficos (requer resultados/*.csv ja existentes).
 docker-graficos:
 	docker compose run --rm --no-deps graficos
+
+# Compila o relatorio (relatorio/Projeto.pdf) com pdflatex + bibtex.
+docker-relatorio:
+	docker compose run --rm --no-deps relatorio
 
 # Sobe os dois servicos em sequencia, respeitando o depends_on.
 docker-up:
