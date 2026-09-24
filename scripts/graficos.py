@@ -42,6 +42,8 @@ COR_MASSA = {
     "inverso": "#9467bd",
     "quase_ordenado": "#ff7f0e",
 }
+# Valor de M adotado nos experimentos principais (marca vertical na calibracao).
+M_ADOTADO = 40
 
 
 def salvar(fig, nome):
@@ -97,6 +99,8 @@ def grafico_calibracao():
             ax.set_xlabel("M (corte para Insertion Sort)")
             ax.set_ylabel(unidade)
             ax.set_xscale("log")
+            ax.axvline(M_ADOTADO, color="black", linestyle=":", linewidth=1.2,
+                       label=f"M adotado = {M_ADOTADO}")
             ax.grid(True, which="both", alpha=0.25, linewidth=0.5)
             ax.legend(fontsize=8)
         fig.suptitle(f"Calibracao empirica de M - {unidade} (pivo central)")
@@ -156,6 +160,35 @@ def graficos_principais():
     eixos[-1].legend(fontsize=8)
     fig.suptitle("Ganho das versoes hibridas sobre o Quicksort recursivo")
     salvar(fig, "ganho_relativo.png")
+
+    # Diferenca percentual da mediana-de-tres em relacao ao hibrido simples,
+    # ambos com o mesmo M. As duas curvas praticamente coincidem nos graficos
+    # principais (overdraw); aqui a diferenca fica explicita. Valores positivos
+    # indicam vantagem da mediana-de-tres; negativos, desvantagem.
+    fig, eixos = plt.subplots(1, len(massas), figsize=(4.2 * len(massas), 3.8),
+                              sharey=True)
+    if len(massas) == 1:
+        eixos = [eixos]
+    for ax, massa in zip(eixos, massas):
+        for coluna, rotulo, cor, marca in [
+            ("comparacoes_medias", "comparacoes", "#1f77b4", "o"),
+            ("tempo_mediana_ms",   "tempo",       "#ff7f0e", "s"),
+        ]:
+            h = df[(df["algoritmo"] == "quicksort_hibrido") & (df["massa"] == massa)]
+            h = h.set_index("n")[coluna]
+            m3 = df[(df["algoritmo"] == "quicksort_mediana3") & (df["massa"] == massa)]
+            m3 = m3.sort_values("n")
+            dif = (1 - m3[coluna].values / h.loc[m3["n"]].values) * 100
+            ax.plot(m3["n"], dif, marker=marca, color=cor, linewidth=1.5,
+                    markersize=5, label=rotulo)
+        ax.axhline(0, color="black", linewidth=0.8)
+        ax.set_xscale("log")
+        ax.set_title(NOME_MASSA[massa], fontsize=10)
+        ax.grid(True, which="both", alpha=0.25, linewidth=0.5)
+    eixos[0].set_ylabel("reducao da mediana-de-3 vs. hibrido (%)")
+    eixos[-1].legend(fontsize=8)
+    fig.suptitle("Efeito isolado da mediana-de-tres (mesmo $M$)")
+    salvar(fig, "diferenca_mediana3.png")
 
 
 # ---------------------------------------------------------------------------
