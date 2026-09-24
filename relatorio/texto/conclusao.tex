@@ -16,22 +16,22 @@ processadores atuais, a localidade de cache e a previsibilidade de desvios do
 Insertion Sort deslocam o ponto de equilíbrio para valores maiores.
 
 Quanto ao \textbf{segundo objetivo}, as versões híbridas reduziram o tempo de
-execução entre 16\% e 45\% em relação ao Quicksort recursivo puro, com mediana de
-31\%, sem prejuízo em nenhuma configuração testada. O ganho foi maior nas massas com
+execução entre 16\% e 54\% em relação ao Quicksort recursivo puro, com mediana de
+28\%, sem prejuízo em nenhuma configuração testada. O ganho foi maior nas massas com
 estrutura, em razão da adaptatividade do Insertion Sort.
 
 Quanto ao \textbf{terceiro objetivo}, o experimento de pior caso confirmou
 numericamente a previsão teórica: a razão comparações/$n^2$ convergiu para exatamente
 $0{,}5000$, correspondendo às $n(n-1)/2$ comparações previstas pela análise. Para
 $n = 50.000$, a diferença entre a escolha inadequada e a adequada de pivô alcançou
-aproximadamente 2.000 vezes em número de comparações e 1.700 vezes em tempo de
+aproximadamente 2.000 vezes em número de comparações e 1.200 vezes em tempo de
 execução.
 
 Quanto ao \textbf{quarto objetivo}, a análise crítica produziu dois resultados que
 merecem destaque.
 
 O primeiro é que a mediana-de-três, quando comparada ao pivô central \textbf{com o
-mesmo valor de $M$}, não apresenta vantagem sistemática: reduz as comparações em 4\%
+mesmo valor de $M$}, não apresenta vantagem sistemática: reduz as comparações em 2\%
 a 9\% apenas em dados aleatórios e é cerca de 1\% pior em entradas ordenadas,
 inversas e quase ordenadas. O resultado é plenamente explicado pela teoria --- em um
 vetor ordenado o elemento central já é a mediana exata do subvetor, de modo que a

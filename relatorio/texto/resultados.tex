@@ -33,7 +33,7 @@ $M$, e a Figura \ref{fig:calib-comp}, o número de comparações. A Tabela
 \textbf{Estratégia de pivô} & \textbf{$n$} & \textbf{$M$ recomendado} & \textbf{$M$ por comparações} \\
 \hline
 Elemento central & 1.000 & 40 & 20 \\
-Elemento central & 10.000 & 100 & 20 \\
+Elemento central & 10.000 & 40 & 20 \\
 Elemento central & 100.000 & 40 & 25 \\
 Mediana de três & 1.000 & 40 & 20 \\
 Mediana de três & 10.000 & 40 & 20 \\
@@ -46,14 +46,14 @@ Três observações merecem destaque.
 
 \paragraph{Estabilidade.} Os dois critérios comportam-se de forma distinta. O
 \textbf{mínimo do número de comparações} --- métrica determinística, imune a ruído ---
-é estável em $M \approx 20$--$25$ nas seis células. O \textbf{mínimo de tempo}, ao
-contrário, variou entre 40 e 100 conforme a célula, pois o platô é plano e o
-\textit{argmin} passa a ser determinado por ruído de medição. O critério do menor $M$
-dentro de 2\% do melhor tempo conduz a $M = 40$ em cinco das seis células; a única
-exceção (pivô central, $n = 10^4$) é justamente a que evidencia a instabilidade do
-critério de tempo. Adotou-se $M = 40$ nos experimentos subsequentes por ser o valor
-recomendado na maioria das células e por manter o Insertion Sort restrito a subvetores
-pequenos.
+é estável em $M \approx 20$--$25$ nas seis células. O \textbf{mínimo de tempo}
+localiza-se em valores mais altos ($M \approx 50$--$70$) e seu \textit{argmin} exato
+desloca-se conforme a célula, pois o platô é plano e a posição do mínimo passa a ser
+determinada por ruído de medição. Por isso o critério adotado não é o \textit{argmin},
+e sim o menor $M$ dentro de 2\% do melhor tempo, que conduz a $M = 40$ em
+\textbf{todas as seis células}. Adotou-se $M = 40$ nos experimentos subsequentes por
+ser o valor recomendado de forma unânime e por manter o Insertion Sort restrito a
+subvetores pequenos.
 
 \paragraph{Divergência entre os critérios.} O mínimo do número de comparações ocorre
 em $M \approx 20$--$25$, enquanto o mínimo do tempo ocorre em valores mais altos. A
@@ -112,21 +112,21 @@ trocas para as três versões, em escala logarítmica nos dois eixos. As Tabelas
 \hline
 \textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
 \hline
-Recursivo & 1.000 & 0,037 & 13.374 & 2.602 \\
-Híbrido & 1.000 & 0,025 & 14.426 & 7.355 \\
-Mediana-3 & 1.000 & 0,026 & 13.846 & 7.736 \\
+Recursivo & 1.000 & 0,037 & 13.323 & 2.600 \\
+Híbrido & 1.000 & 0,021 & 14.435 & 7.414 \\
+Mediana-3 & 1.000 & 0,026 & 14.109 & 7.829 \\
 \hline
-Recursivo & 10.000 & 0,438 & 180.022 & 33.586 \\
-Híbrido & 10.000 & 0,332 & 191.362 & 82.044 \\
-Mediana-3 & 10.000 & 0,338 & 180.820 & 85.022 \\
+Recursivo & 10.000 & 0,459 & 180.022 & 33.586 \\
+Híbrido & 10.000 & 0,341 & 191.362 & 82.044 \\
+Mediana-3 & 10.000 & 0,348 & 180.820 & 85.022 \\
 \hline
-Recursivo & 100.000 & 5,187 & 2.238.090 & 412.988 \\
-Híbrido & 100.000 & 4,161 & 2.351.170 & 897.440 \\
-Mediana-3 & 100.000 & 4,206 & 2.242.550 & 923.525 \\
+Recursivo & 100.000 & 5,435 & 2.238.090 & 412.988 \\
+Híbrido & 100.000 & 4,338 & 2.351.171 & 897.440 \\
+Mediana-3 & 100.000 & 4,387 & 2.242.553 & 923.525 \\
 \hline
-Recursivo & 500.000 & 28,873 & 13.041.400 & 2.332.570 \\
-Híbrido & 500.000 & 24,262 & 13.610.700 & 4.754.780 \\
-Mediana-3 & 500.000 & 24,330 & 12.386.100 & 4.911.090 \\
+Recursivo & 500.000 & 30,016 & 13.041.446 & 2.332.566 \\
+Híbrido & 500.000 & 24,586 & 13.610.714 & 4.754.782 \\
+Mediana-3 & 500.000 & 24,915 & 12.386.071 & 4.911.093 \\
 \hline
 \end{tabular}
 \end{table}
@@ -139,21 +139,21 @@ Mediana-3 & 500.000 & 24,330 & 12.386.100 & 4.911.090 \\
 \hline
 \textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
 \hline
-Recursivo & 1.000 & 0,004 & 9.009 & 511 \\
-Híbrido & 1.000 & 0,002 & 5.942 & 31 \\
-Mediana-3 & 1.000 & 0,002 & 6.004 & 31 \\
+Recursivo & 1.000 & 0,005 & 9.009 & 511 \\
+Híbrido & 1.000 & 0,003 & 5.942 & 31 \\
+Mediana-3 & 1.000 & 0,003 & 6.004 & 31 \\
 \hline
-Recursivo & 10.000 & 0,056 & 125.439 & 5.904 \\
-Híbrido & 10.000 & 0,032 & 89.497 & 255 \\
-Mediana-3 & 10.000 & 0,032 & 90.007 & 255 \\
+Recursivo & 10.000 & 0,064 & 125.439 & 5.904 \\
+Híbrido & 10.000 & 0,041 & 89.497 & 255 \\
+Mediana-3 & 10.000 & 0,041 & 90.007 & 255 \\
 \hline
-Recursivo & 100.000 & 0,701 & 1.600.020 & 65.535 \\
-Híbrido & 100.000 & 0,439 & 1.291.820 & 4.095 \\
-Mediana-3 & 100.000 & 0,437 & 1.300.010 & 4.095 \\
+Recursivo & 100.000 & 0,805 & 1.600.016 & 65.535 \\
+Híbrido & 100.000 & 0,562 & 1.291.821 & 4.095 \\
+Mediana-3 & 100.000 & 0,559 & 1.300.011 & 4.095 \\
 \hline
-Recursivo & 500.000 & 3,588 & 9.000.020 & 262.143 \\
-Híbrido & 500.000 & 2,439 & 7.467.250 & 16.383 \\
-Mediana-3 & 500.000 & 2,452 & 7.500.010 & 16.383 \\
+Recursivo & 500.000 & 4,104 & 9.000.018 & 262.143 \\
+Híbrido & 500.000 & 3,141 & 7.467.247 & 16.383 \\
+Mediana-3 & 500.000 & 3,132 & 7.500.013 & 16.383 \\
 \hline
 \end{tabular}
 \end{table}
@@ -166,21 +166,21 @@ Mediana-3 & 500.000 & 2,452 & 7.500.010 & 16.383 \\
 \hline
 \textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
 \hline
-Recursivo & 1.000 & 0,005 & 9.016 & 1.010 \\
-Híbrido & 1.000 & 0,003 & 5.946 & 530 \\
-Mediana-3 & 1.000 & 0,003 & 6.009 & 530 \\
+Recursivo & 1.000 & 0,006 & 9.016 & 1.010 \\
+Híbrido & 1.000 & 0,004 & 5.946 & 530 \\
+Mediana-3 & 1.000 & 0,004 & 6.009 & 530 \\
 \hline
-Recursivo & 10.000 & 0,060 & 125.452 & 10.904 \\
-Híbrido & 10.000 & 0,035 & 89.504 & 5.254 \\
-Mediana-3 & 10.000 & 0,036 & 90.015 & 5.254 \\
+Recursivo & 10.000 & 0,071 & 125.452 & 10.904 \\
+Híbrido & 10.000 & 0,048 & 89.504 & 5.254 \\
+Mediana-3 & 10.000 & 0,048 & 90.015 & 5.254 \\
 \hline
-Recursivo & 100.000 & 0,723 & 1.600.030 & 115.534 \\
-Híbrido & 100.000 & 0,471 & 1.291.830 & 54.094 \\
-Mediana-3 & 100.000 & 0,486 & 1.300.020 & 54.094 \\
+Recursivo & 100.000 & 0,861 & 1.600.030 & 115.534 \\
+Híbrido & 100.000 & 0,618 & 1.291.832 & 54.094 \\
+Mediana-3 & 100.000 & 0,618 & 1.300.023 & 54.094 \\
 \hline
-Recursivo & 500.000 & 3,748 & 9.000.030 & 512.142 \\
-Híbrido & 500.000 & 2,664 & 7.467.260 & 266.382 \\
-Mediana-3 & 500.000 & 2,664 & 7.500.030 & 266.382 \\
+Recursivo & 500.000 & 4,371 & 9.000.034 & 512.142 \\
+Híbrido & 500.000 & 3,404 & 7.467.260 & 266.382 \\
+Mediana-3 & 500.000 & 3,434 & 7.500.027 & 266.382 \\
 \hline
 \end{tabular}
 \end{table}
@@ -193,21 +193,21 @@ Mediana-3 & 500.000 & 2,664 & 7.500.030 & 266.382 \\
 \hline
 \textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
 \hline
-Recursivo & 1.000 & 0,020 & 10.500 & 3.844 \\
-Híbrido & 1.000 & 0,014 & 7.946 & 2.607 \\
-Mediana-3 & 1.000 & 0,015 & 7.633 & 2.536 \\
+Recursivo & 1.000 & 0,020 & 10.427 & 3.840 \\
+Híbrido & 1.000 & 0,009 & 7.806 & 2.524 \\
+Mediana-3 & 1.000 & 0,016 & 7.571 & 2.571 \\
 \hline
-Recursivo & 10.000 & 0,200 & 135.619 & 54.818 \\
-Híbrido & 10.000 & 0,157 & 102.243 & 33.791 \\
-Mediana-3 & 10.000 & 0,162 & 101.570 & 34.211 \\
+Recursivo & 10.000 & 0,221 & 135.619 & 54.818 \\
+Híbrido & 10.000 & 0,163 & 102.243 & 33.791 \\
+Mediana-3 & 10.000 & 0,179 & 101.570 & 34.211 \\
 \hline
-Recursivo & 100.000 & 2,261 & 1.687.010 & 712.530 \\
-Híbrido & 100.000 & 1,783 & 1.357.200 & 500.738 \\
-Mediana-3 & 100.000 & 1,777 & 1.353.860 & 501.874 \\
+Recursivo & 100.000 & 2,467 & 1.687.013 & 712.530 \\
+Híbrido & 100.000 & 2,011 & 1.357.196 & 500.738 \\
+Mediana-3 & 100.000 & 2,004 & 1.353.863 & 501.874 \\
 \hline
-Recursivo & 500.000 & 11,709 & 9.776.490 & 4.131.090 \\
-Híbrido & 500.000 & 9,215 & 8.124.660 & 3.068.950 \\
-Mediana-3 & 500.000 & 9,168 & 7.880.700 & 3.070.610 \\
+Recursivo & 500.000 & 13,117 & 9.776.488 & 4.131.089 \\
+Híbrido & 500.000 & 10,825 & 8.124.660 & 3.068.952 \\
+Mediana-3 & 500.000 & 11,023 & 7.880.701 & 3.070.614 \\
 \hline
 \end{tabular}
 \end{table}
@@ -220,21 +220,21 @@ Mediana-3 & 500.000 & 9,168 & 7.880.700 & 3.070.610 \\
 \hline
 \textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Trocas} \\
 \hline
-Recursivo & 1.000 & 0,005 & 9.049 & 534 \\
-Híbrido & 1.000 & 0,003 & 6.008 & 73 \\
-Mediana-3 & 1.000 & 0,003 & 6.099 & 68 \\
+Recursivo & 1.000 & 0,006 & 9.030 & 533 \\
+Híbrido & 1.000 & 0,004 & 5.989 & 79 \\
+Mediana-3 & 1.000 & 0,004 & 6.112 & 81 \\
 \hline
-Recursivo & 10.000 & 0,063 & 125.767 & 6.252 \\
-Híbrido & 10.000 & 0,039 & 90.778 & 1.159 \\
-Mediana-3 & 10.000 & 0,039 & 91.981 & 1.140 \\
+Recursivo & 10.000 & 0,072 & 125.767 & 6.252 \\
+Híbrido & 10.000 & 0,048 & 90.778 & 1.159 \\
+Mediana-3 & 10.000 & 0,048 & 91.981 & 1.140 \\
 \hline
-Recursivo & 100.000 & 0,776 & 1.607.420 & 70.047 \\
-Híbrido & 100.000 & 0,521 & 1.302.120 & 12.210 \\
-Mediana-3 & 100.000 & 0,516 & 1.316.460 & 12.367 \\
+Recursivo & 100.000 & 0,904 & 1.607.418 & 70.047 \\
+Híbrido & 100.000 & 0,650 & 1.302.115 & 12.210 \\
+Mediana-3 & 100.000 & 0,651 & 1.316.461 & 12.367 \\
 \hline
-Recursivo & 500.000 & 3,988 & 9.043.950 & 300.847 \\
-Híbrido & 500.000 & 2,927 & 7.527.610 & 69.366 \\
-Mediana-3 & 500.000 & 2,913 & 7.599.190 & 69.628 \\
+Recursivo & 500.000 & 4,698 & 9.043.946 & 300.847 \\
+Híbrido & 500.000 & 3,668 & 7.527.613 & 69.366 \\
+Mediana-3 & 500.000 & 3,688 & 7.599.189 & 69.628 \\
 \hline
 \end{tabular}
 \end{table}
@@ -252,8 +252,8 @@ híbridas em relação ao Quicksort recursivo puro.
 \end{figure}
 \FloatBarrier
 
-O ganho é consistente: a redução de tempo varia entre \textbf{16\% e 45\%}, com
-mediana de \textbf{31\%}, sem que nenhuma configuração apresente prejuízo. Confirma-se,
+O ganho é consistente: a redução de tempo varia entre \textbf{16\% e 54\%}, com
+mediana de \textbf{28\%}, sem que nenhuma configuração apresente prejuízo. Confirma-se,
 portanto, a hipótese que fundamenta a versão híbrida.
 
 Cabe observar que o ganho é maior nas massas com estrutura (Ordenado, Quase
@@ -281,11 +281,11 @@ comparadas com o \textbf{mesmo valor de $M$}, conforme a Tabela \ref{tab:mediana
 \hline
 \textbf{Massa} & \textbf{$n$=1.000} & \textbf{$n$=10.000} & \textbf{$n$=100.000} & \textbf{$n$=500.000} \\
 \hline
-Aleatório & $+4{,}02\%$ & $+5{,}51\%$ & $+4{,}62\%$ & $+9{,}00\%$ \\
-Repetidos & $+3{,}94\%$ & $+0{,}66\%$ & $+0{,}25\%$ & $+3{,}00\%$ \\
+Aleatório & $+2{,}26\%$ & $+5{,}51\%$ & $+4{,}62\%$ & $+9{,}00\%$ \\
+Repetidos & $+3{,}01\%$ & $+0{,}66\%$ & $+0{,}25\%$ & $+3{,}00\%$ \\
 Ordenado & $-1{,}04\%$ & $-0{,}57\%$ & $-0{,}63\%$ & $-0{,}44\%$ \\
 Inverso & $-1{,}06\%$ & $-0{,}57\%$ & $-0{,}63\%$ & $-0{,}44\%$ \\
-Quase ordenado & $-1{,}51\%$ & $-1{,}33\%$ & $-1{,}10\%$ & $-0{,}95\%$ \\
+Quase ordenado & $-2{,}05\%$ & $-1{,}33\%$ & $-1{,}10\%$ & $-0{,}95\%$ \\
 \hline
 \multicolumn{5}{l}{\footnotesize Valores positivos indicam vantagem da mediana-de-três.} \\
 \end{tabular}
@@ -306,7 +306,7 @@ constante) fica explícito.
 O resultado é nítido e inteiramente explicado pela teoria:
 
 \begin{itemize}
-  \item Na massa \textbf{Aleatório}, a mediana-de-três reduz as comparações em 4\% a
+  \item Na massa \textbf{Aleatório}, a mediana-de-três reduz as comparações em 2\% a
         9\%. O elemento central de um vetor aleatório é um elemento qualquer da
         distribuição; a mediana de três amostras é um estimador melhor da mediana
         verdadeira do subvetor, produzindo partições mais equilibradas. A magnitude
@@ -345,13 +345,13 @@ apresentam os resultados.
 \textbf{Versão} & \textbf{$n$} & \textbf{Tempo (ms)} & \textbf{Comparações} & \textbf{Comp./$n^2$} \\
 \hline
 Pivô = primeiro & 1.000 & 0,138 & 501.498 & 0,5015 \\
-Pivô = primeiro & 5.000 & 3,343 & 12.507.498 & 0,5003 \\
-Pivô = primeiro & 10.000 & 13,239 & 50.014.998 & 0,5001 \\
-Pivô = primeiro & 20.000 & 55,087 & 200.029.998 & 0,5001 \\
-Pivô = primeiro & 50.000 & 334,355 & 1.250.074.998 & 0,5000 \\
+Pivô = primeiro & 5.000 & 3,172 & 12.507.498 & 0,5003 \\
+Pivô = primeiro & 10.000 & 12,679 & 50.014.998 & 0,5001 \\
+Pivô = primeiro & 20.000 & 50,657 & 200.029.998 & 0,5001 \\
+Pivô = primeiro & 50.000 & 309,115 & 1.250.074.998 & 0,5000 \\
 \hline
-Recursivo (central) & 50.000 & 0,329 & 750.015 & 0,0003 \\
-Mediana-3 & 50.000 & 0,198 & 600.010 & 0,0002 \\
+Recursivo (central) & 50.000 & 0,378 & 750.015 & 0,0003 \\
+Mediana-3 & 50.000 & 0,261 & 600.010 & 0,0002 \\
 \hline
 \end{tabular}
 \end{table}
@@ -375,7 +375,7 @@ $n^2$ tende a zero.
 Em números absolutos, para $n = 50.000$ a versão com pivô inadequado executa
 1.250.074.998 comparações contra 600.010 da versão com mediana-de-três: uma diferença
 de aproximadamente \textbf{2.000 vezes}, refletida em tempo de execução
-\textbf{1.700 vezes} maior (334,4 ms contra 0,198 ms).
+\textbf{1.200 vezes} maior (309,1 ms contra 0,261 ms).
 
 Cabe registrar uma consequência prática frequentemente esquecida. No pior caso, a
 profundidade da recursão é $n$, e não $O(\log n)$. Com a pilha padrão de 8 MB do
@@ -394,8 +394,8 @@ intuição derivada exclusivamente da análise assintótica.
 \subsection{Mais comparações, menos tempo}
 
 Observe-se a massa Aleatório na Tabela \ref{tab:aleatorio}. Para $n = 100.000$, o
-Quicksort recursivo executa 2.238.090 comparações em 5,187 ms, enquanto a versão
-híbrida executa 2.351.170 comparações --- \textbf{5\% a mais} --- em 4,161 ms,
+Quicksort recursivo executa 2.238.090 comparações em 5,435 ms, enquanto a versão
+híbrida executa 2.351.171 comparações --- \textbf{5\% a mais} --- em 4,338 ms,
 sendo, portanto, \textbf{20\% mais rápida}. O mesmo padrão repete-se em todos os
 tamanhos, e também no número de trocas, que mais que dobra na versão híbrida.
 
