@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -36,6 +37,9 @@ std::ofstream abrirCsv(const std::string& caminho, const std::string& cabecalho)
         std::cerr << "ERRO: nao foi possivel escrever em " << caminho << "\n";
         std::exit(1);
     }
+    // Precisao alta para nao perder algarismos em contagens grandes (ex.:
+    // 1250074998 viraria 1.25007e+09 sem isso) nem no tempo.
+    out << std::setprecision(12);
     out << cabecalho << "\n";
     std::cout << "  -> " << caminho << "\n";
     return out;
