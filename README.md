@@ -209,9 +209,10 @@ e o desvio ficam disponíveis para documentar a dispersão.
 
 ## Calibração empírica de M
 
-`./bin/quicksort calibrar` varre `M ∈ {1, 2, …, 200}` para `n ∈ {1000, 10000,
-100000}` sobre três massas, com repetições adaptativas (mais repetições para `n`
-pequeno, onde os transientes pesam mais).
+`./bin/quicksort calibrar` varre dezenove valores de `M ∈ {1, 2, 3, 4, 5, 6, 8, 10,
+12, 15, 20, 25, 30, 40, 50, 70, 100, 150, 200}` para `n ∈ {1000, 10000, 100000}`
+sobre três massas, com repetições adaptativas (mais repetições para `n` pequeno,
+onde os transientes pesam mais).
 
 O critério de recomendação **não** é o `argmin` puro do tempo: perto do ótimo a
 curva é praticamente plana, e o `argmin` passa a escolher com base em ruído (em
@@ -219,12 +220,12 @@ execuções preliminares oscilou entre 12 e 100 sem diferença real). O critéri
 adotado é **o menor M cujo tempo fica dentro de 2% do melhor tempo observado** —
 reproduzível, e mantém o Insertion Sort restrito a subvetores pequenos.
 
-Resultado (reproduzível entre execuções):
+Resultado:
 
-- **M recomendado ≈ 30–40**, estável para os três tamanhos e para as duas
-  estratégias de pivô;
-- `argmin` por comparações: **M ≈ 20–25**;
-- o platô de bom desempenho se estende de ~20 a ~70.
+- `argmin` por comparações (determinístico): **M ≈ 20–25**, estável nas seis células;
+- `argmin` de tempo: **varia entre 40 e 100** conforme a célula, por ser ruidoso;
+- menor M dentro de 2% do melhor tempo: **M = 40 em cinco das seis células**;
+- o platô de tempo (dentro de 2% do melhor) estende-se, tipicamente, de ~40 a ~100.
 
 O valor adotado como padrão no código é **M = 40**.
 

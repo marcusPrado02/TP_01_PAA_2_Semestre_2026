@@ -26,14 +26,14 @@ $M$, e a Figura \ref{fig:calib-comp}, o número de comparações. A Tabela
 
 \begin{table}[H]
 \centering
-\caption{Valores de $M$ obtidos pela calibração empírica.}
+\caption{Valores de $M$ obtidos pela calibração empírica. A coluna ``$M$ recomendado'' usa o critério do menor $M$ dentro de 2\% do melhor tempo; a coluna ``$M$ por comparações'' usa o mínimo do número de comparações.}
 \label{tab:calibracao}
 \begin{tabular}{lccc}
 \hline
 \textbf{Estratégia de pivô} & \textbf{$n$} & \textbf{$M$ recomendado} & \textbf{$M$ por comparações} \\
 \hline
 Elemento central & 1.000 & 40 & 20 \\
-Elemento central & 10.000 & 40 & 20 \\
+Elemento central & 10.000 & 100 & 20 \\
 Elemento central & 100.000 & 40 & 25 \\
 Mediana de três & 1.000 & 40 & 20 \\
 Mediana de três & 10.000 & 40 & 20 \\
@@ -44,17 +44,24 @@ Mediana de três & 100.000 & 40 & 25 \\
 
 Três observações merecem destaque.
 
-\paragraph{Estabilidade.} O valor recomendado, $M \approx 30$--$40$, manteve-se
-estável entre execuções independentes, entre os três tamanhos de entrada e entre as
-duas estratégias de pivô. O platô de bom desempenho estende-se aproximadamente de
-$M = 20$ a $M = 70$, o que indica que a escolha exata dentro dessa faixa é pouco
-relevante na prática. Adotou-se $M = 40$ nos experimentos subsequentes.
+\paragraph{Estabilidade.} Os dois critérios comportam-se de forma distinta. O
+\textbf{mínimo do número de comparações} --- métrica determinística, imune a ruído ---
+é estável em $M \approx 20$--$25$ nas seis células. O \textbf{mínimo de tempo}, ao
+contrário, variou entre 40 e 100 conforme a célula, pois o platô é plano e o
+\textit{argmin} passa a ser determinado por ruído de medição. O critério do menor $M$
+dentro de 2\% do melhor tempo conduz a $M = 40$ em cinco das seis células; a única
+exceção (pivô central, $n = 10^4$) é justamente a que evidencia a instabilidade do
+critério de tempo. Adotou-se $M = 40$ nos experimentos subsequentes por ser o valor
+recomendado na maioria das células e por manter o Insertion Sort restrito a subvetores
+pequenos.
 
 \paragraph{Divergência entre os critérios.} O mínimo do número de comparações ocorre
-em $M \approx 20$--$25$, enquanto o mínimo do tempo ocorre em valores mais altos.
-A divergência é informativa: acima de $M = 25$, o algoritmo passa a executar
+em $M \approx 20$--$25$, enquanto o mínimo do tempo ocorre em valores mais altos. A
+divergência é informativa: acima de $M = 25$, o algoritmo passa a executar
 \textit{mais} comparações e ainda assim torna-se \textit{mais rápido}. Esse fenômeno
-é analisado na Seção \ref{sec:analise-critica}.
+é analisado na Seção \ref{sec:analise-critica}. O platô de tempo (valores dentro de
+2\% do melhor) estende-se, na maioria das células, de $M \approx 40$ a $M \approx 100$;
+quem fica próximo de 20 é o mínimo de \textbf{comparações}, não o de tempo.
 
 \paragraph{Comparação com a literatura.} O valor obtido é superior à faixa de 5 a 25
 sugerida por \citeonline{sedgewick1978}. A diferença é coerente com a evolução do
