@@ -7,7 +7,7 @@
  * Uso:
  *   ./bin/quicksort validar             verifica a corretude das tres versoes
  *   ./bin/quicksort calibrar            busca empirica do melhor M
- *   ./bin/quicksort experimentos [M]    bateria principal (padrao: M = 20)
+ *   ./bin/quicksort experimentos [M]    bateria principal (padrao: M = 40)
  *   ./bin/quicksort pior-caso [M]       experimento de pior caso forcado
  *   ./bin/quicksort tudo [M]            executa tudo, na ordem acima
  */

@@ -76,3 +76,13 @@ TP - quicksort (1).pdf
 bin/
 Rascunho___Trabalho_Eletronica___Relatório_final___Conversor_DA (2).zip
 relatorio-overleaf.zip
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Especificação do trabalho (local)
+ESPECIFICACAO.md
+
+# Instruções locais para agentes (local)
+AGENTS.md

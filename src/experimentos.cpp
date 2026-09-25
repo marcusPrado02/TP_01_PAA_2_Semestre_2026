@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -25,6 +26,7 @@ unsigned semente(int n, int repeticao) {
 
 /** Numero de repeticoes: mais repeticoes para entradas pequenas (mais ruido). */
 int repeticoesPara(int n) {
+    if (n <= 1000)   return 50;   // n pequeno: tempo ~5 us, exige mais reps
     if (n <= 10000)  return 10;
     if (n <= 100000) return 5;
     return 3;
@@ -36,6 +38,9 @@ std::ofstream abrirCsv(const std::string& caminho, const std::string& cabecalho)
         std::cerr << "ERRO: nao foi possivel escrever em " << caminho << "\n";
         std::exit(1);
     }
+    // Precisao alta para nao perder algarismos em contagens grandes (ex.:
+    // 1250074998 viraria 1.25007e+09 sem isso) nem no tempo.
+    out << std::setprecision(12);
     out << cabecalho << "\n";
     std::cout << "  -> " << caminho << "\n";
     return out;
@@ -96,6 +101,18 @@ Resumo resumir(std::vector<Medida> medidas) {
     r.tempo_mediana_ms = (k % 2 == 1)
         ? medidas[k / 2].tempo_ms
         : 0.5 * (medidas[k / 2 - 1].tempo_ms + medidas[k / 2].tempo_ms);
+
+    // Desvio absoluto mediano (MAD), robusto a outliers.
+    std::vector<double> desvios;
+    desvios.reserve(k);
+    for (const Medida& m : medidas) {
+        desvios.push_back(std::abs(m.tempo_ms - r.tempo_mediana_ms));
+    }
+    std::sort(desvios.begin(), desvios.end());
+    const double mad = (k % 2 == 1)
+        ? desvios[k / 2]
+        : 0.5 * (desvios[k / 2 - 1] + desvios[k / 2]);
+    r.tempo_mad_ms = 1.4826 * mad;   // consistente com o desvio-padrao sob normalidade
     return r;
 }
 
@@ -129,6 +146,36 @@ static std::vector<Medida> medirRepeticoes(const Algoritmo& alg,
     medidas.reserve(entradas.size());
     for (const std::vector<int>& e : entradas) {
         medidas.push_back(executar(alg, e));
+    }
+    return medidas;
+}
+
+/**
+ * Mede varios algoritmos sobre as mesmas entradas em regime de rodizio
+ * (round-robin): a cada repeticao executa todos os algoritmos, um apos o outro.
+ *
+ * Motivo: medir todos os A, depois todos os B e por fim todos os C faz com que
+ * qualquer deriva lenta da maquina (temperatura, frequencia, carga) penalize
+ * sistematicamente as medidas mais tardias. O rodizio distribui essa deriva
+ * igualmente entre as versoes, de modo que a comparacao entre elas seja justa.
+ * Retorna um vetor de medidas por algoritmo, na mesma ordem de 'algs'.
+ */
+static std::vector<std::vector<Medida>> medirIntercalado(
+        const std::vector<Algoritmo>& algs,
+        const std::vector<std::vector<int>>& entradas) {
+    // Aquecimento local: 1 execucao descartada por algoritmo.
+    if (!entradas.empty()) {
+        for (const Algoritmo& alg : algs) {
+            (void) executar(alg, entradas.front());
+        }
+    }
+    std::vector<std::vector<Medida>> medidas(algs.size());
+    for (std::vector<Medida>& m : medidas) m.reserve(entradas.size());
+
+    for (const std::vector<int>& e : entradas) {
+        for (std::size_t i = 0; i < algs.size(); ++i) {
+            medidas[i].push_back(executar(algs[i], e));
+        }
     }
     return medidas;
 }
@@ -243,7 +290,7 @@ void calibrarM(const std::string& dirSaida) {
 
     std::ofstream csv = abrirCsv(dirSaida + "/calibracao_m.csv",
         "pivo,massa,n,M,tempo_mediana_ms,tempo_medio_ms,tempo_min_ms,tempo_desvio_ms,"
-        "comparacoes_medias,trocas_medias,repeticoes");
+        "tempo_mad_ms,comparacoes_medias,trocas_medias,repeticoes");
 
     // Melhor M por (pivo, n). Guardamos DOIS criterios:
     //  - tempo (mediana somada sobre as massas): o que interessa na pratica,
@@ -274,6 +321,7 @@ void calibrarM(const std::string& dirSaida) {
                     csv << nomePivo(pivo) << ',' << nomeMassa(t) << ',' << n << ',' << M
                         << ',' << r.tempo_mediana_ms << ',' << r.tempo_medio_ms
                         << ',' << r.tempo_min_ms << ',' << r.tempo_desvio_ms
+                        << ',' << r.tempo_mad_ms
                         << ',' << r.comparacoes_medias << ',' << r.trocas_medias
                         << ',' << r.repeticoes << '\n';
                     // Criterio de selecao: MEDIANA (robusta a ruido do SO).
@@ -326,7 +374,7 @@ void experimentosPrincipais(const std::string& dirSaida, int M) {
         "algoritmo,M,pivo,massa,n,repeticao,tempo_ms,comparacoes,trocas");
     std::ofstream resumo = abrirCsv(dirSaida + "/experimentos_resumo.csv",
         "algoritmo,M,pivo,massa,n,repeticoes,tempo_mediana_ms,tempo_medio_ms,"
-        "tempo_min_ms,tempo_desvio_ms,comparacoes_medias,trocas_medias");
+        "tempo_min_ms,tempo_desvio_ms,tempo_mad_ms,comparacoes_medias,trocas_medias");
 
     for (TipoMassa t : todasAsMassas()) {
         std::printf("\n  massa = %s\n", nomeMassa(t));
@@ -344,8 +392,14 @@ void experimentosPrincipais(const std::string& dirSaida, int M) {
                 entradas.push_back(gerarMassa(t, n, semente(n, rep)));
             }
 
-            for (const Algoritmo& alg : algs) {
-                const std::vector<Medida> medidas = medirRepeticoes(alg, entradas);
+            // Mede os tres algoritmos em rodizio sobre as mesmas entradas, para
+            // que eventual deriva lenta da maquina nao penalize uma versao.
+            const std::vector<std::vector<Medida>> todas =
+                medirIntercalado(algs, entradas);
+
+            for (std::size_t ia = 0; ia < algs.size(); ++ia) {
+                const Algoritmo& alg = algs[ia];
+                const std::vector<Medida>& medidas = todas[ia];
                 for (int rep = 0; rep < reps; ++rep) {
                     const Medida& m = medidas[rep];
                     bruto << alg.nome << ',' << alg.M << ',' << nomePivo(alg.pivo) << ','
@@ -357,6 +411,7 @@ void experimentosPrincipais(const std::string& dirSaida, int M) {
                        << nomeMassa(t) << ',' << n << ',' << r.repeticoes << ','
                        << r.tempo_mediana_ms << ',' << r.tempo_medio_ms << ','
                        << r.tempo_min_ms << ',' << r.tempo_desvio_ms << ','
+                       << r.tempo_mad_ms << ','
                        << r.comparacoes_medias << ',' << r.trocas_medias << '\n';
                 std::printf("  %-22s %8d %7d %14.3f %12.3f %10.3f %16.0f %16.0f\n",
                             alg.nome.c_str(), n, r.repeticoes, r.tempo_mediana_ms,
@@ -390,7 +445,7 @@ void experimentoPiorCaso(const std::string& dirSaida, int M) {
 
     std::ofstream csv = abrirCsv(dirSaida + "/pior_caso.csv",
         "algoritmo,M,pivo,massa,n,repeticoes,tempo_mediana_ms,tempo_medio_ms,"
-        "tempo_min_ms,tempo_desvio_ms,comparacoes_medias,trocas_medias,"
+        "tempo_min_ms,tempo_desvio_ms,tempo_mad_ms,comparacoes_medias,trocas_medias,"
         "comparacoes_sobre_n2");
 
     for (TipoMassa t : massas) {
@@ -411,6 +466,7 @@ void experimentoPiorCaso(const std::string& dirSaida, int M) {
                     << nomeMassa(t) << ',' << n << ',' << r.repeticoes << ','
                     << r.tempo_mediana_ms << ',' << r.tempo_medio_ms << ','
                     << r.tempo_min_ms << ',' << r.tempo_desvio_ms << ','
+                    << r.tempo_mad_ms << ','
                     << r.comparacoes_medias << ',' << r.trocas_medias << ','
                     << razao << '\n';
                 std::printf("  %-26s %8d %14.3f %16.0f %12.4f\n",

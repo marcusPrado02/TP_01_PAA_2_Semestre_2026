@@ -142,16 +142,38 @@ assimétrica à direita, e a média é sistematicamente puxada pelos valores at�
 
 Por essa razão, a análise apresentada no Capítulo \ref{cap:resultados} utiliza a
 \textbf{mediana} dos tempos. Os arquivos de resultado registram mediana, média,
-mínimo e desvio-padrão, de modo que a dispersão das medidas permanece documentada e
-verificável.
+mínimo, desvio-padrão e desvio absoluto mediano, de modo que a dispersão das medidas
+permanece documentada e verificável.
 
 \subsection{Número de repetições}
 
 O número de repetições é adaptativo, pois entradas pequenas são ordenadas em dezenas
 de microssegundos e sofrem proporcionalmente muito mais com transientes do sistema.
-Nos experimentos principais utilizaram-se 10 repetições para $n \leq 10.000$, 5 para
-$n = 100.000$ e 3 para $n = 500.000$. Na calibração de $M$, onde as diferenças são
-mais sutis, utilizaram-se até 200 repetições para $n = 1.000$.
+Nos experimentos principais utilizaram-se 50 repetições para $n \leq 1.000$, 10 para
+$n \leq 10.000$, 5 para $n = 100.000$ e 3 para $n = 500.000$. Na calibração de $M$,
+onde as diferenças são mais sutis, utilizaram-se até 200 repetições para $n = 1.000$.
+
+\subsection{Intercalação das medições}
+
+As versões em comparação são medidas em regime de \textbf{rodízio}
+(\textit{round-robin}): a cada repetição, os três algoritmos são executados um após o
+outro sobre a mesma entrada, em vez de se medir todas as repetições de um algoritmo
+para só depois passar ao seguinte. A motivação é que qualquer deriva lenta da máquina
+--- aquecimento, variação de frequência, carga de fundo --- penaliza
+sistematicamente as medições mais tardias. Medir em blocos faria com que um algoritmo
+medido por último herdasse essa deriva; o rodízio a distribui igualmente entre as três
+versões, de modo que a comparação entre elas seja justa.
+
+\subsection{Dispersão robusta (MAD)}
+
+Além da média e do desvio-padrão amostral, registra-se o \textbf{desvio absoluto
+mediano} (MAD), definido como $1{,}4826 \times \operatorname{mediana}(|x_i -
+\operatorname{mediana}(x)|)$. O desvio-padrão clássico é dominado por um único valor
+atípico: uma interrupção do sistema que acrescente alguns microssegundos a uma das
+repetições eleva o desvio-padrão a valores que não representam a dispersão típica. O
+MAD, por basear-se em medianas, estima a dispersão efetiva das medidas e evidencia
+que a variabilidade real é pequena mesmo quando há picos isolados. Os arquivos de
+resultado registram as duas métricas.
 
 \subsection{Verificação de corretude}
 
@@ -166,9 +188,10 @@ baixo.
 \section{Calibração empírica de \textit{M}}
 \label{sec:calibracao}
 
-Para determinar $M$, varreu-se $M \in \{1, 2, \ldots, 200\}$ sobre as massas
-Aleatório, Ordenado e Repetidos, para $n \in \{1.000;\ 10.000;\ 100.000\}$ e para as
-duas estratégias de pivô.
+Para determinar $M$, varreu-se um conjunto de dezenove valores,
+$M \in \{1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 70, 100, 150, 200\}$,
+sobre as massas Aleatório, Ordenado e Repetidos, para $n \in \{1.000;\ 10.000;\
+100.000\}$ e para as duas estratégias de pivô.
 
 O critério de escolha adotado \textbf{não} é o mínimo absoluto do tempo. Nas
 proximidades do ótimo, a curva é praticamente plana, e o mínimo absoluto passa a ser

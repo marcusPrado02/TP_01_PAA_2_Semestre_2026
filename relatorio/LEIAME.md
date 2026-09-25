@@ -24,8 +24,12 @@ imagem/                  figuras geradas por scripts/graficos.py
 ./compilar.sh
 ```
 
-**No Overleaf:** suba o ZIP e defina `Projeto.tex` como documento principal
-(Menu → Main document). O compilador deve ser **pdfLaTeX**.
+**No Overleaf:** gere o pacote na raiz do projeto e suba o ZIP:
+```bash
+make overleaf-zip          # gera relatorio-overleaf.zip (ou: make docker-overleaf)
+```
+No Overleaf, use **New Project → Upload Project** e defina `Projeto.tex` como
+documento principal (Menu → Main document). O compilador deve ser **pdfLaTeX**.
 
 ## Regenerar as figuras
 

@@ -1,0 +1,58 @@
+# Ambiente containerizado do TP de PAA (Quicksort).
+#
+# Uso:
+#   docker compose build                 # constroi as imagens
+#   docker compose run --rm experimentos # make tudo (validar + calibrar + experimentos + pior-caso)
+#   docker compose run --rm graficos     # gera graficos/*.png e graficos/tabelas.tex
+#   docker compose run --rm relatorio    # compila relatorio/Projeto.pdf
+#   docker compose run --rm overleaf     # gera relatorio-overleaf.zip (upload no Overleaf)
+#   docker compose up --abort-on-container-exit   # executa os dois primeiros em sequencia
+#
+# O repositorio inteiro e montado em /app: os CSVs, PNGs e o PDF saem no host,
+# com o mesmo dono (UID/GID do usuario), pois nao ha COPY do codigo para a imagem.
+
+x-comum: &comum
+  volumes:
+    - .:/app
+  working_dir: /app
+  # Escreve como o usuario do host para os arquivos gerados nao ficarem como root.
+  user: "${UID:-1000}:${GID:-1000}"
+
+services:
+  # Parte 1: compilacao + experimentos em C++. Sem limite de CPU de proposito:
+  # restringir cpus distorceria as medidas de tempo do trabalho.
+  experimentos:
+    <<: *comum
+    build:
+      context: .
+      dockerfile: docker/experimentos.Dockerfile
+    image: tp-paa-quicksort-experimentos
+    # make tudo <M>; sobrescreva com: docker compose run --rm experimentos tudo M=25
+    command: ["tudo"]
+
+  # Parte 2: graficos e tabelas LaTeX. Depende dos CSVs gerados pela parte 1.
+  graficos:
+    <<: *comum
+    build:
+      context: .
+      dockerfile: docker/graficos.Dockerfile
+    image: tp-paa-quicksort-graficos
+    depends_on:
+      experimentos:
+        condition: service_completed_successfully
+
+  # Parte 3: compilacao do relatorio em LaTeX (pdflatex + bibtex).
+  relatorio:
+    <<: *comum
+    build:
+      context: .
+      dockerfile: docker/relatorio.Dockerfile
+    image: tp-paa-quicksort-relatorio
+
+  # Parte 4: empacota o relatorio em ZIP para upload no Overleaf.
+  overleaf:
+    <<: *comum
+    build:
+      context: .
+      dockerfile: docker/overleaf.Dockerfile
+    image: tp-paa-quicksort-overleaf

@@ -40,6 +40,15 @@ struct Resumo {
     double tempo_mediana_ms = 0.0;
     double tempo_min_ms = 0.0;
     double tempo_desvio_ms = 0.0;
+    /**
+     * Desvio absoluto mediano (MAD), robusto a outliers: 1.4826 * mediana(|x -
+     * mediana|). O desvio-padrao classico e dominado por um unico pico de
+     * sistema (preempcao, interrupcao) e chega a superestimar a dispersao real
+     * em uma ordem de grandeza; o MAD estima a dispersao tipica. Ex.: em n=1000
+     * uma unica medida de 0,0154 ms entre 50 de 0,0058 ms eleva o desvio
+     * classico a 23%, enquanto o MAD permanece em ~0,1%.
+     */
+    double tempo_mad_ms = 0.0;
     double comparacoes_medias = 0.0;
     double trocas_medias = 0.0;
     int repeticoes = 0;

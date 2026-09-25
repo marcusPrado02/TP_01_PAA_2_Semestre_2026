@@ -18,11 +18,14 @@ ENTRADA = RAIZ / "resultados"
 SAIDA = RAIZ / "graficos"
 
 # Rotulos legiveis e estilo fixo por algoritmo (mesma cor em todos os graficos).
+# A mediana-de-tres usa linha tracejada porque suas curvas praticamente coincidem
+# com as do hibrido simples em varias massas; o tracejado evita que uma serie
+# cubra a outra (overdraw) e torna as duas distinguiveis.
 ESTILO = {
     "quicksort_recursivo":     ("Quicksort recursivo",        "#1f77b4", "o", "-"),
     "quicksort_hibrido":       ("Quicksort hibrido",          "#d62728", "s", "-"),
-    "quicksort_mediana3":      ("Hibrido + mediana-de-tres",  "#2ca02c", "^", "-"),
-    "quicksort_pivo_primeiro": ("Pivo = primeiro (pior caso)", "#9467bd", "D", "--"),
+    "quicksort_mediana3":      ("Hibrido + mediana-de-tres",  "#2ca02c", "^", "--"),
+    "quicksort_pivo_primeiro": ("Pivo = primeiro (pior caso)", "#9467bd", "D", ":"),
 }
 NOME_MASSA = {
     "aleatorio": "Aleatorio",
@@ -31,6 +34,16 @@ NOME_MASSA = {
     "repetidos": "Muitos elementos repetidos",
     "quase_ordenado": "Quase ordenado",
 }
+# Cor fixa por massa, usada nos graficos de calibracao (o eixo x e M, nao n).
+COR_MASSA = {
+    "aleatorio": "#1f77b4",
+    "ordenado": "#2ca02c",
+    "repetidos": "#d62728",
+    "inverso": "#9467bd",
+    "quase_ordenado": "#ff7f0e",
+}
+# Valor de M adotado nos experimentos principais (marca vertical na calibracao).
+M_ADOTADO = 40
 
 
 def salvar(fig, nome):
@@ -80,11 +93,14 @@ def grafico_calibracao():
             for massa, grupo in sub.groupby("massa"):
                 grupo = grupo.sort_values("M")
                 ax.plot(grupo["M"], grupo[coluna], marker="o", markersize=4,
-                        linewidth=1.5, label=NOME_MASSA.get(massa, massa))
+                        linewidth=1.5, color=COR_MASSA.get(massa),
+                        label=NOME_MASSA.get(massa, massa))
             ax.set_title(f"n = {n}")
             ax.set_xlabel("M (corte para Insertion Sort)")
             ax.set_ylabel(unidade)
             ax.set_xscale("log")
+            ax.axvline(M_ADOTADO, color="black", linestyle=":", linewidth=1.2,
+                       label=f"M adotado = {M_ADOTADO}")
             ax.grid(True, which="both", alpha=0.25, linewidth=0.5)
             ax.legend(fontsize=8)
         fig.suptitle(f"Calibracao empirica de M - {unidade} (pivo central)")
@@ -120,23 +136,59 @@ def graficos_principais():
         salvar(fig, f"principal_{metrica}.png")
 
     # Ganho relativo das versoes hibridas sobre a recursiva pura.
+    # Uma faceta por massa, eixo x = n (log): le a tendencia ao longo de n sem
+    # os 20 rotulos rotacionados de um eixo categorico.
     base = df[df["algoritmo"] == "quicksort_recursivo"].set_index(["massa", "n"])
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    for alg in ["quicksort_hibrido", "quicksort_mediana3"]:
-        sub = df[df["algoritmo"] == alg].set_index(["massa", "n"])
-        ganho = (1 - sub["tempo_mediana_ms"] / base["tempo_mediana_ms"]) * 100
-        rotulo, cor, marca, _ = ESTILO[alg]
-        ax.plot(range(len(ganho)), ganho.values, marker=marca, color=cor,
-                linestyle="", markersize=7, label=rotulo)
-    ax.axhline(0, color="black", linewidth=0.8)
-    ax.set_xticks(range(len(ganho)))
-    ax.set_xticklabels([f"{m}\nn={n}" for m, n in ganho.index], fontsize=6,
-                       rotation=90)
-    ax.set_ylabel("reducao de tempo vs. recursivo puro (%)")
-    ax.set_title("Ganho das versoes hibridas sobre o Quicksort recursivo")
-    ax.grid(True, axis="y", alpha=0.25)
-    ax.legend()
+    fig, eixos = plt.subplots(1, len(massas), figsize=(4.2 * len(massas), 3.8),
+                              sharey=True)
+    if len(massas) == 1:
+        eixos = [eixos]
+    for ax, massa in zip(eixos, massas):
+        base_m = df[(df["algoritmo"] == "quicksort_recursivo") & (df["massa"] == massa)]
+        base_m = base_m.set_index("n")["tempo_mediana_ms"]
+        for alg in ["quicksort_hibrido", "quicksort_mediana3"]:
+            sub = df[(df["algoritmo"] == alg) & (df["massa"] == massa)].sort_values("n")
+            ganho = (1 - sub["tempo_mediana_ms"].values / base_m.loc[sub["n"]].values) * 100
+            rotulo, cor, marca, traco = ESTILO[alg]
+            ax.plot(sub["n"], ganho, marker=marca, color=cor, linestyle=traco,
+                    linewidth=1.5, markersize=5, label=rotulo)
+        ax.axhline(0, color="black", linewidth=0.8)
+        ax.set_xscale("log")
+        ax.set_title(NOME_MASSA[massa], fontsize=10)
+        ax.grid(True, which="both", alpha=0.25, linewidth=0.5)
+    eixos[0].set_ylabel("reducao de tempo vs. recursivo puro (%)")
+    eixos[-1].legend(fontsize=8)
+    fig.suptitle("Ganho das versoes hibridas sobre o Quicksort recursivo")
     salvar(fig, "ganho_relativo.png")
+
+    # Diferenca percentual da mediana-de-tres em relacao ao hibrido simples,
+    # ambos com o mesmo M. As duas curvas praticamente coincidem nos graficos
+    # principais (overdraw); aqui a diferenca fica explicita. Valores positivos
+    # indicam vantagem da mediana-de-tres; negativos, desvantagem.
+    fig, eixos = plt.subplots(1, len(massas), figsize=(4.2 * len(massas), 3.8),
+                              sharey=True)
+    if len(massas) == 1:
+        eixos = [eixos]
+    for ax, massa in zip(eixos, massas):
+        for coluna, rotulo, cor, marca in [
+            ("comparacoes_medias", "comparacoes", "#1f77b4", "o"),
+            ("tempo_mediana_ms",   "tempo",       "#ff7f0e", "s"),
+        ]:
+            h = df[(df["algoritmo"] == "quicksort_hibrido") & (df["massa"] == massa)]
+            h = h.set_index("n")[coluna]
+            m3 = df[(df["algoritmo"] == "quicksort_mediana3") & (df["massa"] == massa)]
+            m3 = m3.sort_values("n")
+            dif = (1 - m3[coluna].values / h.loc[m3["n"]].values) * 100
+            ax.plot(m3["n"], dif, marker=marca, color=cor, linewidth=1.5,
+                    markersize=5, label=rotulo)
+        ax.axhline(0, color="black", linewidth=0.8)
+        ax.set_xscale("log")
+        ax.set_title(NOME_MASSA[massa], fontsize=10)
+        ax.grid(True, which="both", alpha=0.25, linewidth=0.5)
+    eixos[0].set_ylabel("reducao da mediana-de-3 vs. hibrido (%)")
+    eixos[-1].legend(fontsize=8)
+    fig.suptitle("Efeito isolado da mediana-de-tres (mesmo $M$)")
+    salvar(fig, "diferenca_mediana3.png")
 
 
 # ---------------------------------------------------------------------------
