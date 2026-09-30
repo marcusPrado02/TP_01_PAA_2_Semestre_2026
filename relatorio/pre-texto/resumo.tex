@@ -13,10 +13,12 @@ comparações e trocas de forma idêntica. Os algoritmos foram avaliados sobre c
 massas de teste --- aleatória, ordenada, inversamente ordenada, com muitos elementos
 repetidos e quase ordenada --- em quatro tamanhos de entrada, entre mil e quinhentos
 mil elementos, medindo-se tempo de execução, número de comparações e número de
-trocas. A calibração empírica indicou $M \approx 40$ como valor ótimo, superior à
+trocas. A calibração empírica mostrou que o mínimo do número de comparações é estável
+em $M \approx 20$--$25$, enquanto o mínimo de tempo é ruidoso; adotou-se $M = 40$ pelo
+critério do menor valor dentro de 2\% do melhor tempo. Esse valor é superior à
 faixa de 5 a 25 recomendada pela literatura clássica, diferença atribuída às
 características do hardware atual. As versões híbridas reduziram o tempo de execução
-entre 16\% e 45\% em relação à versão recursiva pura. Um experimento específico
+entre 16\% e 54\% em relação à versão recursiva pura. Um experimento específico
 forçou o pior caso do algoritmo, combinando vetor ordenado com escolha inadequada de
 pivô, e confirmou numericamente a previsão teórica: a razão entre o número de
 comparações e $n^2$ convergiu para exatamente $0{,}5000$, com diferença de

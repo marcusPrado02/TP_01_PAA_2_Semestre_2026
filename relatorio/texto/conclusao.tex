@@ -6,31 +6,32 @@ Quicksort --- recursivo puro, híbrido com Insertion Sort e híbrido com
 mediana-de-três --- avaliadas sobre cinco massas de teste e quatro tamanhos de
 entrada, com medição de tempo de execução, número de comparações e número de trocas.
 
-Quanto ao \textbf{primeiro objetivo específico}, a calibração empírica indicou
-$M \approx 30$--$40$ como faixa ótima, com platô de bom desempenho entre 20 e 70. O
-valor adotado, $M = 40$, mostrou-se estável entre execuções independentes, entre
-tamanhos de entrada e entre estratégias de pivô. Esse valor é superior à faixa de 5 a
-25 recomendada por \citeonline{sedgewick1978}, diferença atribuída à evolução do
-hardware: em processadores atuais, a localidade de cache e a previsibilidade de
-desvios do Insertion Sort deslocam o ponto de equilíbrio para valores maiores.
+Quanto ao \textbf{primeiro objetivo específico}, a calibração empírica mostrou que o
+mínimo do número de comparações --- métrica determinística --- é estável em
+$M \approx 20$--$25$, enquanto o mínimo de tempo é sensível a ruído e variou entre 40
+e 100. Adotou-se o critério do menor $M$ dentro de 2\% do melhor tempo, que conduz a
+$M = 40$ na maioria das células. Esse valor é superior à faixa de 5 a 25 recomendada
+por \citeonline{sedgewick1978}, diferença atribuída à evolução do hardware: em
+processadores atuais, a localidade de cache e a previsibilidade de desvios do
+Insertion Sort deslocam o ponto de equilíbrio para valores maiores.
 
 Quanto ao \textbf{segundo objetivo}, as versões híbridas reduziram o tempo de
-execução entre 16\% e 45\% em relação ao Quicksort recursivo puro, com mediana de
-31\%, sem prejuízo em nenhuma configuração testada. O ganho foi maior nas massas com
+execução entre 16\% e 54\% em relação ao Quicksort recursivo puro, com mediana de
+28\%, sem prejuízo em nenhuma configuração testada. O ganho foi maior nas massas com
 estrutura, em razão da adaptatividade do Insertion Sort.
 
 Quanto ao \textbf{terceiro objetivo}, o experimento de pior caso confirmou
 numericamente a previsão teórica: a razão comparações/$n^2$ convergiu para exatamente
 $0{,}5000$, correspondendo às $n(n-1)/2$ comparações previstas pela análise. Para
 $n = 50.000$, a diferença entre a escolha inadequada e a adequada de pivô alcançou
-aproximadamente 2.000 vezes em número de comparações e 1.700 vezes em tempo de
+aproximadamente 2.000 vezes em número de comparações e 1.200 vezes em tempo de
 execução.
 
 Quanto ao \textbf{quarto objetivo}, a análise crítica produziu dois resultados que
 merecem destaque.
 
 O primeiro é que a mediana-de-três, quando comparada ao pivô central \textbf{com o
-mesmo valor de $M$}, não apresenta vantagem sistemática: reduz as comparações em 4\%
+mesmo valor de $M$}, não apresenta vantagem sistemática: reduz as comparações em 2\%
 a 9\% apenas em dados aleatórios e é cerca de 1\% pior em entradas ordenadas,
 inversas e quase ordenadas. O resultado é plenamente explicado pela teoria --- em um
 vetor ordenado o elemento central já é a mediana exata do subvetor, de modo que a

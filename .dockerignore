@@ -1,0 +1,13 @@
+# Nao envia ao daemon Docker o que nao e necessario para construir as imagens.
+# O codigo do projeto NAO e copiado (bind mount), mas o contexto ainda e enviado.
+.git/
+bin/
+resultados/
+graficos/
+relatorio/
+docker/
+docker-compose.yml
+*.md
+*.pdf
+*.zip
+*.log
