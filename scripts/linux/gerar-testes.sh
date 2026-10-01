@@ -7,6 +7,7 @@
 #   ./gerar-testes.sh calibrar     # so a calibracao de M
 #   ./gerar-testes.sh experimentos # so a bateria principal
 #   ./gerar-testes.sh pior-caso    # so o pior caso forcado
+#   ./gerar-testes.sh tamanhos     # justifica a escolha dos tamanhos de n
 #   M=25 ./gerar-testes.sh         # sobrescreve o corte M (padrao: 40)
 #
 # Saida: resultados/*.csv no host.
@@ -15,10 +16,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/_comum.sh"
 
 ALVO="${1:-tudo}"
 case "$ALVO" in
-    validar|calibrar|experimentos|pior-caso|tudo) ;;
+    validar|calibrar|experimentos|pior-caso|tamanhos|tudo) ;;
     *)
         echo "Alvo invalido: '$ALVO'." >&2
-        echo "Use: validar | calibrar | experimentos | pior-caso | tudo" >&2
+        echo "Use: validar | calibrar | experimentos | pior-caso | tamanhos | tudo" >&2
         exit 1
         ;;
 esac

@@ -9,6 +9,7 @@
  *   ./bin/quicksort calibrar            busca empirica do melhor M
  *   ./bin/quicksort experimentos [M]    bateria principal (padrao: M = 40)
  *   ./bin/quicksort pior-caso [M]       experimento de pior caso forcado
+ *   ./bin/quicksort tamanhos [M]        justifica a escolha dos tamanhos de n
  *   ./bin/quicksort tudo [M]            executa tudo, na ordem acima
  */
 
@@ -31,6 +32,7 @@ void uso(const char* prog) {
         "  calibrar        busca empirica do melhor valor de M\n"
         "  experimentos    bateria principal: 3 versoes x 5 massas x 4 tamanhos\n"
         "  pior-caso       forca o pior caso do Quicksort (pivo inadequado)\n"
+        "  tamanhos        justifica empiricamente a escolha dos tamanhos de n\n"
         "  tudo            executa todos os comandos acima\n\n"
         "  [M]  corte para o Insertion Sort nas versoes hibridas (padrao: "
         << M_PADRAO << ")\n\n"
@@ -73,12 +75,18 @@ int main(int argc, char** argv) {
         experimentoPiorCaso(DIR_SAIDA, M);
         return 0;
     }
+    if (comando == "tamanhos") {
+        aquecerCPU();
+        escolherTamanhos(DIR_SAIDA, M);
+        return 0;
+    }
     if (comando == "tudo") {
         if (!validar()) return 1;
         aquecerCPU();
         calibrarM(DIR_SAIDA);
         experimentosPrincipais(DIR_SAIDA, M);
         experimentoPiorCaso(DIR_SAIDA, M);
+        escolherTamanhos(DIR_SAIDA, M);
         std::cout << "Concluido. CSVs em '" << DIR_SAIDA << "/'.\n";
         return 0;
     }

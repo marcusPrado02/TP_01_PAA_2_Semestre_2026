@@ -477,3 +477,99 @@ void experimentoPiorCaso(const std::string& dirSaida, int M) {
     }
     std::cout << "\n";
 }
+
+// ---------------------------------------------------------------------------
+// Escolha dos tamanhos de entrada
+// ---------------------------------------------------------------------------
+
+void escolherTamanhos(const std::string& dirSaida, int M) {
+    std::cout << "== Escolha dos tamanhos de entrada (n) ==\n";
+    std::cout << "  Criterios: (1) piso de ruido; (2) regime assintotico; "
+                 "(3) teto pratico.\n\n";
+
+    // Resolucao efetiva do relogio: menor delta nao-nulo entre duas leituras.
+    // Serve para expressar cada tempo em "ticks" e julgar se a medicao tem
+    // folga suficiente sobre a granularidade do relogio.
+    double resolucao_ms = 1e9;
+    for (int i = 0; i < 2000; ++i) {
+        const auto a = Relogio::now();
+        const auto b = Relogio::now();
+        const double d = std::chrono::duration<double, std::milli>(b - a).count();
+        if (d > 0.0 && d < resolucao_ms) resolucao_ms = d;
+    }
+    std::printf("  Resolucao do relogio: %.4f us\n", resolucao_ms * 1000.0);
+    std::printf("  Constante teorica do caso medio (recursivo puro): %.4f\n\n",
+                2.0 * std::log(2.0));
+
+    // Faixa varrida: do muito pequeno (para achar o piso) ao teto pratico.
+    const std::vector<int> tamanhos = {
+        100, 200, 500, 1000, 2000, 5000, 10000,
+        20000, 50000, 100000, 200000, 500000
+    };
+    const int reps = 30;
+    const int sementes = 4;
+
+    std::ofstream csv = abrirCsv(dirSaida + "/escolha_n.csv",
+        "n,tempo_mediana_ms,ticks_relogio,cv_mad_pct,"
+        "comparacoes_sobre_nlogn,razao_sobre_teoria,memoria_entrada_kb");
+
+    std::printf("  %9s %13s %9s %9s %14s %9s\n",
+                "n", "mediana(ms)", "ticks", "CV_MAD%", "comp/(n log2 n)", "vs teo");
+    for (int n : tamanhos) {
+        std::vector<Medida> medidas;
+        std::vector<double> razoes;
+        for (int s = 0; s < sementes; ++s) {
+            const auto entrada = gerarMassa(TipoMassa::ALEATORIO, n,
+                                            semente(n, s));
+            // Aquecimento local por (n, semente).
+            for (int w = 0; w < 2; ++w) {
+                std::vector<int> v = entrada;
+                Contadores c;
+                quicksort(v, c, 1, EstrategiaPivo::MEIO);
+            }
+            // A razao assintotica e medida no recursivo puro (M=1): a versao
+            // hibrida tem o Insertion Sort dominando em n pequeno e deslocaria
+            // a razao. O tempo, porem, e medido na versao hibrida (M), que e a
+            // usada de fato na bateria principal.
+            {
+                std::vector<int> v = entrada;
+                Contadores c;
+                quicksort(v, c, 1, EstrategiaPivo::MEIO);
+                razoes.push_back(static_cast<double>(c.comparacoes)
+                                 / (n * std::log2(static_cast<double>(n))));
+            }
+            for (int r = 0; r < reps; ++r) {
+                std::vector<int> v = entrada;
+                Contadores c;
+                const auto t0 = Relogio::now();
+                quicksort(v, c, M, EstrategiaPivo::MEIO);
+                const auto t1 = Relogio::now();
+                Medida m;
+                m.tempo_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+                m.comparacoes = c.comparacoes;
+                m.trocas = c.trocas;
+                medidas.push_back(m);
+            }
+        }
+
+        const Resumo r = resumir(medidas);
+        double razao = 0.0;
+        for (double x : razoes) razao += x;
+        razao /= razoes.size();
+        const double teoria = 2.0 * std::log(2.0);
+        const double ticks = r.tempo_mediana_ms / resolucao_ms;
+        const double cv_mad = (r.tempo_mediana_ms > 0.0)
+            ? 100.0 * r.tempo_mad_ms / r.tempo_mediana_ms : 0.0;
+        const double memoria_kb = static_cast<double>(n) * sizeof(int) / 1024.0;
+
+        csv << n << ',' << r.tempo_mediana_ms << ',' << ticks << ','
+            << cv_mad << ',' << razao << ',' << razao / teoria << ','
+            << memoria_kb << '\n';
+        std::printf("  %9d %13.4f %9.0f %9.2f %14.4f %9.3f\n",
+                    n, r.tempo_mediana_ms, ticks, cv_mad, razao, razao / teoria);
+    }
+    std::cout << "\n  Leitura: abaixo de n~1000 a medicao dura poucos ticks do\n"
+                 "  relogio e a dispersao cresce (piso de ruido). A razao\n"
+                 "  comp/(n log2 n) estabiliza muito antes, indicando que o teto\n"
+                 "  ja esta no regime assintotico. Ver a secao de metodologia.\n\n";
+}
