@@ -26,7 +26,8 @@ make validar              # verifica a corretude das três versões
 make calibrar             # busca empírica do melhor M
 make experimentos         # bateria principal
 make pior-caso            # experimento de pior caso forçado
-make tudo                 # executa tudo (≈ 20 s)
+make tamanhos             # justifica a escolha dos tamanhos de n
+make tudo                 # executa tudo (≈ 30 s)
 make graficos             # gera gráficos e tabelas LaTeX (requer matplotlib/pandas)
 make overleaf-zip         # gera relatorio-overleaf.zip para upload no Overleaf
 make limpar
@@ -204,6 +205,25 @@ reproduzível.
 | `quase_ordenado` | ordenado com ~1% dos elementos trocados de posição |
 
 Tamanhos: `n ∈ {1000, 10000, 100000, 500000}`.
+
+### Como os tamanhos foram escolhidos
+
+Os `n` não são arbitrários. `./bin/quicksort tamanhos` (ou `make tamanhos`) varre
+uma faixa ampla e, para cada tamanho, imprime três evidências:
+
+1. **Piso de ruído** — o tempo expresso em *ticks* do relógio (resolução medida
+   de ~20 ns). Em `n = 100` a ordenação dura só 29 ticks e a dispersão robusta
+   chega a 10%; em `n = 500` já passa de 200 ticks e a dispersão cai a ~1%.
+   Adotou-se `n = 1000` (470 ticks) como piso conservador.
+2. **Regime assintótico** — a razão `comparações/(n·log₂n)` do Quicksort recursivo
+   puro deve convergir para a constante teórica `2·ln2 ≈ 1,386`. Ela já é estável
+   desde `n = 100`, confirmando o comportamento `n log n`.
+3. **Teto prático** — a razão acima não muda mesmo em `n = 10⁷`; ir além só
+   encarece a bateria (memória e tempo) sem revelar nada novo.
+
+O resultado é a progressão geométrica adotada, que cobre três ordens de grandeza
+começando acima do piso de ruído. O experimento de pior caso para em `n = 50.000`
+porque ali a profundidade de recursão é `O(n)` e estoura a pilha.
 
 ---
 
