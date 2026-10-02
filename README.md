@@ -131,6 +131,26 @@ recurso pago, não aceita projetos já existentes e usa a raiz do repositório c
 raiz do projeto (o `Projeto.tex` está em `relatorio/`). Por isso o upload do ZIP
 é o caminho recomendado — repita-o sempre que o relatório mudar.
 
+#### Alternativa automatizada (Git integration)
+
+Se a conta Overleaf tiver o *Git integration* habilitado, dá para enviar o
+relatório por script, sem subir ZIP a cada mudança. Uma única vez, no site:
+
+1. **New Project → Blank Project**; copie o ID da URL `.../project/<ID>`.
+2. **Account Settings → Git authentication tokens → Generate token**.
+
+Depois, em cada atualização:
+
+```bash
+export OVERLEAF_PROJECT_ID=<ID>
+export OVERLEAF_TOKEN=<TOKEN>
+./scripts/linux/overleaf_push.sh            # ou: scripts\windows\overleaf_push.ps1
+```
+
+O script clona o projeto, espelha `relatorio/` na raiz dele (mesma estrutura do
+ZIP), remove os intermediários do LaTeX e faz o push. É idempotente: sem mudanças,
+não cria commit. O token não é gravado em disco nem exibido — usa `GIT_ASKPASS`.
+
 ---
 
 ## Organização do código

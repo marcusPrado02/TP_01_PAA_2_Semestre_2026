@@ -77,6 +77,9 @@ bin/
 Rascunho___Trabalho_Eletronica___Relatório_final___Conversor_DA (2).zip
 relatorio-overleaf.zip
 
+# Clone de trabalho do Overleaf (scripts/overleaf_push)
+.overleaf-work/
+
 # Cache do Python
 __pycache__/
 *.pyc
