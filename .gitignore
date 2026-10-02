@@ -83,6 +83,7 @@ relatorio-overleaf.zip
 # Cache do Python
 __pycache__/
 *.pyc
+.ruff_cache/
 
 # Especificação do trabalho (local)
 ESPECIFICACAO.md
