@@ -82,4 +82,17 @@ void experimentosPrincipais(const std::string& dirSaida, int M);
 /** Experimento que forca explicitamente o pior caso (item 2c). */
 void experimentoPiorCaso(const std::string& dirSaida, int M);
 
+/**
+ * Justifica a ESCOLHA DOS TAMANHOS de entrada usados na bateria principal.
+ *
+ * Varre uma faixa ampla de n e, para cada um, reporta tres evidencias:
+ *   1. quantos "ticks" do relogio a medicao dura (tempo / resolucao do relogio);
+ *   2. a dispersao robusta (MAD/mediana), que indica se a medicao e confiavel;
+ *   3. a razao comparacoes/(n log2 n) do Quicksort recursivo puro, que deve
+ *      convergir para a constante teorica do caso medio 2*ln2 ~= 1,386.
+ * Com isso identifica-se o piso de ruido (menor n confiavel) e verifica-se que
+ * o teto escolhido ja esta no regime assintotico.
+ */
+void escolherTamanhos(const std::string& dirSaida, int M);
+
 #endif // EXPERIMENTOS_HPP

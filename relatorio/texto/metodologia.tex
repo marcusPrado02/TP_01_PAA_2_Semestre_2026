@@ -73,6 +73,54 @@ de pares, subestimaria sistematicamente o trabalho realizado pelo Insertion Sort
 Foram utilizadas cinco massas de teste, descritas na Tabela \ref{tab:massas}, com
 $n$ igual a 1.000, 10.000, 100.000 e 500.000 elementos.
 
+\subsection{Escolha dos tamanhos de entrada}
+\label{sec:escolha-n}
+
+Os tamanhos não foram arbitrados: foram escolhidos a partir de uma varredura
+empírica, reproduzível pelo comando \texttt{./bin/quicksort tamanhos}. Para cada
+$n$, mede-se o Quicksort híbrido sobre a massa Aleatória e registram-se três
+evidências.
+
+\begin{enumerate}
+  \item \textbf{Piso de ruído.} O tempo medido é expresso em \emph{ticks} do
+        relógio (tempo dividido pela resolução efetiva, medida em
+        $\approx 20$\,ns). Quando a ordenação dura poucos ticks, o valor é
+        dominado pela granularidade do relógio e pela variação do escalonador.
+        Em $n = 100$ a execução dura apenas 29 ticks e a dispersão robusta (MAD)
+        chega a 10\%; em $n = 500$ já passa de 200 ticks e a dispersão cai para
+        cerca de 1\%. Adotou-se $n = 1.000$ como piso conservador --- com 470
+        ticks ---, valor também sugerido pelo enunciado para os testes de $M$.
+
+  \item \textbf{Regime assintótico.} A razão entre o número de comparações e
+        $n\log_2 n$ deve convergir para a constante teórica do caso médio,
+        $2\ln 2 \approx 1{,}386$, prevista pela análise do Quicksort recursivo
+        puro. Essa razão é estável ao longo de toda a faixa testada (de $n = 100$
+        a $n = 500.000$), confirmando que o algoritmo já se encontra no regime
+        $n\log n$ desde os menores tamanhos.
+
+  \item \textbf{Teto prático.} O maior tamanho é limitado pelo tempo total da
+        bateria e pela memória. A razão assintótica não revela informação nova em
+        tamanhos muito maiores --- verificou-se que ela permanece na mesma faixa
+        mesmo em $n = 10^7$ ---, de modo que estender o teto apenas aumentaria o
+        custo sem agregar evidência.
+\end{enumerate}
+
+Adotou-se, assim, a progressão geométrica $n \in \{1.000;\ 10.000;\ 100.000;\
+500.000\}$, que abrange três ordens de grandeza, começa acima do piso de ruído e
+termina num tamanho cuja bateria completa ainda é executável em segundos. O
+experimento de pior caso usa tamanhos menores (até $50.000$), pois ali a
+profundidade de recursão é $O(n)$ e estoura a pilha, como discutido na Seção
+\ref{sec:res-piorcaso}. A Figura \ref{fig:escolha-n} resume as duas primeiras
+evidências.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagem/escolha_n.png}
+\caption{Escolha dos tamanhos de entrada. À esquerda, o tempo medido expresso em ticks do relógio (escala log); a linha tracejada marca o limiar de 100 ticks. À direita, a razão entre comparações e $n\log_2 n$ do Quicksort recursivo puro, comparada à constante teórica $2\ln 2 \approx 1{,}386$.}
+\label{fig:escolha-n}
+\end{figure}
+\FloatBarrier
+
 \begin{table}[H]
 \centering
 \caption{Massas de teste utilizadas.}

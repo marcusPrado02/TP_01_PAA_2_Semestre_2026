@@ -6,6 +6,7 @@
 #   .\gerar-testes.ps1 calibrar     # so a calibracao de M
 #   .\gerar-testes.ps1 experimentos # so a bateria principal
 #   .\gerar-testes.ps1 pior-caso    # so o pior caso forcado
+#   .\gerar-testes.ps1 tamanhos     # justifica a escolha dos tamanhos de n
 #   $env:M=25; .\gerar-testes.ps1   # sobrescreve o corte M (padrao: 40)
 #
 # Saida: resultados\*.csv no host.
@@ -13,7 +14,7 @@
 . "$PSScriptRoot\_comum.ps1"
 
 $alvo = if ($args.Count -ge 1) { $args[0] } else { 'tudo' }
-$validos = @('validar', 'calibrar', 'experimentos', 'pior-caso', 'tudo')
+$validos = @('validar', 'calibrar', 'experimentos', 'pior-caso', 'tamanhos', 'tudo')
 if ($validos -notcontains $alvo) {
     Write-Error "Alvo invalido: '$alvo'. Use: $($validos -join ' | ')"
     exit 1

@@ -7,9 +7,9 @@ ALVO      = $(BINDIR)/quicksort
 FONTES    = $(wildcard $(SRCDIR)/*.cpp)
 OBJETOS   = $(FONTES:$(SRCDIR)/%.cpp=$(BINDIR)/%.o)
 
-.PHONY: all validar calibrar experimentos pior-caso tudo graficos overleaf-zip limpar \
+.PHONY: all validar calibrar experimentos pior-caso tamanhos tudo graficos overleaf-zip limpar \
         docker-build docker-tudo docker-validar docker-calibrar \
-        docker-experimentos docker-pior-caso docker-graficos docker-relatorio \
+        docker-experimentos docker-pior-caso docker-tamanhos docker-graficos docker-relatorio \
         docker-overleaf docker-up
 
 all: $(ALVO)
@@ -38,6 +38,10 @@ experimentos: $(ALVO) resultados
 pior-caso: $(ALVO) resultados
 	./$(ALVO) pior-caso $(M)
 
+# Justifica empiricamente a escolha dos tamanhos de entrada.
+tamanhos: $(ALVO) resultados
+	./$(ALVO) tamanhos $(M)
+
 tudo: $(ALVO) resultados
 	./$(ALVO) tudo $(M)
 
@@ -55,7 +59,7 @@ limpar:
 # Alvos com Docker (nao requerem g++/make/python/matplotlib no host)
 # ---------------------------------------------------------------------------
 
-# Constroi as duas imagens (experimentos em C++ e graficos em Python).
+# Constroi as imagens (experimentos, graficos, relatorio e overleaf).
 docker-build:
 	docker compose build
 
@@ -76,6 +80,9 @@ docker-experimentos:
 
 docker-pior-caso:
 	docker compose run --rm experimentos pior-caso M=$(M)
+
+docker-tamanhos:
+	docker compose run --rm experimentos tamanhos M=$(M)
 
 # Gera apenas os graficos (requer resultados/*.csv ja existentes).
 docker-graficos:

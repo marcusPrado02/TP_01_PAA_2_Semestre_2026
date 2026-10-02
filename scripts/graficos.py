@@ -6,6 +6,7 @@ Uso:  python3 scripts/graficos.py        (a partir da raiz do projeto)
 Saida: graficos/*.png  +  graficos/tabelas.tex (tabelas prontas para o Overleaf)
 """
 
+import math
 from pathlib import Path
 
 import matplotlib
@@ -229,7 +230,48 @@ def graficos_pior_caso():
 
 
 # ---------------------------------------------------------------------------
-# 4. Tabelas LaTeX prontas para o relatorio
+# 4. Escolha dos tamanhos de entrada (n)
+# ---------------------------------------------------------------------------
+def grafico_escolha_n():
+    arq = ENTRADA / "escolha_n.csv"
+    if not arq.exists():
+        print("  (escolha_n.csv ausente - execute './bin/quicksort tamanhos')")
+        return
+    df = pd.read_csv(arq)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.2))
+
+    # Painel esquerdo: piso de ruido (ticks do relogio e dispersao robusta).
+    ax1.plot(df["n"], df["ticks_relogio"], marker="o", color="#1f77b4",
+             linewidth=1.6, label="ticks do relogio")
+    ax1.set_xscale("log")
+    ax1.set_yscale("log")
+    ax1.axhline(100, color="#d62728", linestyle=":", linewidth=1.2,
+                label="limiar ~100 ticks")
+    ax1.set_xlabel("n (numero de elementos)")
+    ax1.set_ylabel("tempo / resolucao do relogio")
+    ax1.set_title("Piso de ruido")
+    ax1.grid(True, which="both", alpha=0.25, linewidth=0.5)
+    ax1.legend(fontsize=8)
+
+    # Painel direito: regime assintotico (razao comp/(n log2 n) vs teoria).
+    ax2.plot(df["n"], df["comparacoes_sobre_nlogn"], marker="s", color="#2ca02c",
+             linewidth=1.6, label="comp / (n log2 n)")
+    ax2.axhline(2 * math.log(2), color="black", linestyle="--", linewidth=1.2,
+                label="teoria 2 ln 2 = 1,386")
+    ax2.set_xscale("log")
+    ax2.set_xlabel("n (numero de elementos)")
+    ax2.set_ylabel("comparacoes / (n log2 n)")
+    ax2.set_title("Regime assintotico")
+    ax2.grid(True, which="both", alpha=0.25, linewidth=0.5)
+    ax2.legend(fontsize=8)
+
+    fig.suptitle("Escolha dos tamanhos de entrada")
+    salvar(fig, "escolha_n.png")
+
+
+# ---------------------------------------------------------------------------
+# 5. Tabelas LaTeX prontas para o relatorio
 # ---------------------------------------------------------------------------
 def tabelas_latex():
     arq = ENTRADA / "experimentos_resumo.csv"
@@ -263,5 +305,6 @@ if __name__ == "__main__":
     grafico_calibracao()
     graficos_principais()
     graficos_pior_caso()
+    grafico_escolha_n()
     tabelas_latex()
     print("Concluido.")
